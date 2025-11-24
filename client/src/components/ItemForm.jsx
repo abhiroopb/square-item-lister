@@ -216,7 +216,7 @@ export function ItemForm() {
             📦 View Item in Square Sandbox
           </a>
           <p style={{ fontSize: '14px', color: '#666', marginTop: '8px', textAlign: 'center' }}>
-            1. Click the link above to go to Square Developer Dashboard<br/>
+            1. Click the link to go to Square Developer Dashboard<br/>
             2. Click "Open" next to your Sandbox test account<br/>
             3. Go to Items & Orders → Items Library<br/>
             4. Find your item: <strong>{item.title}</strong>
