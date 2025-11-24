@@ -82,7 +82,21 @@ router.post('/enhance', async (req, res) => {
       return res.status(400).json({ error: 'Image path required' });
     }
 
-    const result = await enhanceImage(imagePath, userOpenAIKey);
+    // Convert relative path to absolute path if needed
+    let fullImagePath = imagePath;
+    if (!path.isAbsolute(imagePath)) {
+      // If it's a relative path like '/uploads/filename.jpg', convert to absolute
+      if (imagePath.startsWith('/uploads/')) {
+        const filename = path.basename(imagePath);
+        fullImagePath = path.join(__dirname, '../uploads', filename);
+      } else {
+        fullImagePath = path.join(__dirname, '..', imagePath);
+      }
+    }
+
+    console.log('Enhancing image:', { imagePath, fullImagePath });
+
+    const result = await enhanceImage(fullImagePath, userOpenAIKey);
     
     res.json(result);
   } catch (error) {
@@ -107,11 +121,25 @@ router.post('/analyze', async (req, res) => {
       return res.status(400).json({ error: 'Image path required' });
     }
 
+    // Convert relative path to absolute path if needed
+    let fullImagePath = imagePath;
+    if (!path.isAbsolute(imagePath)) {
+      // If it's a relative path like '/uploads/filename.jpg', convert to absolute
+      if (imagePath.startsWith('/uploads/')) {
+        const filename = path.basename(imagePath);
+        fullImagePath = path.join(__dirname, '../uploads', filename);
+      } else {
+        fullImagePath = path.join(__dirname, '..', imagePath);
+      }
+    }
+
+    console.log('Analyzing image:', { imagePath, fullImagePath });
+
     // Run AI analysis in parallel
     const [titleResult, descResult, priceResult] = await Promise.all([
-      generateTitle(imagePath, userOpenAIKey),
-      generateDescription(imagePath, null, userOpenAIKey),
-      suggestPrice(imagePath, 'Item', userOpenAIKey)
+      generateTitle(fullImagePath, userOpenAIKey),
+      generateDescription(fullImagePath, null, userOpenAIKey),
+      suggestPrice(fullImagePath, 'Item', userOpenAIKey)
     ]);
 
     // If we have a title, search for more info
@@ -122,7 +150,7 @@ router.post('/analyze', async (req, res) => {
         searchResults = searchResult.results;
         
         // Regenerate description with search results
-        const enhancedDesc = await generateDescription(imagePath, searchResults, userOpenAIKey);
+        const enhancedDesc = await generateDescription(fullImagePath, searchResults, userOpenAIKey);
         if (enhancedDesc.success) {
           descResult.description = enhancedDesc.description;
         }
