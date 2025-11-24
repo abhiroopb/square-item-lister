@@ -123,6 +123,9 @@ body {
   max-width: 600px;
   border-radius: 12px;
   margin-bottom: 20px;
+  background: #000;
+  min-height: 300px;
+  object-fit: cover;
 }
 
 .camera-controls {

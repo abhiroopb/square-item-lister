@@ -12,16 +12,32 @@ export function ImageCapture() {
 
   const startCamera = async () => {
     try {
-      const mediaStream = await navigator.mediaDevices.getUserMedia({ 
-        video: { facingMode: 'environment' } 
-      });
+      setError(null);
+      const constraints = {
+        video: { 
+          facingMode: { ideal: 'environment' },
+          width: { ideal: 1920 },
+          height: { ideal: 1080 }
+        }
+      };
+      
+      const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
       setStream(mediaStream);
-      if (videoRef.current) {
-        videoRef.current.srcObject = mediaStream;
-      }
       setUseCamera(true);
+      
+      // Wait for next frame to ensure video element is rendered
+      setTimeout(() => {
+        if (videoRef.current) {
+          videoRef.current.srcObject = mediaStream;
+          videoRef.current.play().catch(e => {
+            console.error('Error playing video:', e);
+            setError('Failed to start camera preview: ' + e.message);
+          });
+        }
+      }, 100);
     } catch (err) {
-      setError('Failed to access camera: ' + err.message);
+      console.error('Camera error:', err);
+      setError('Failed to access camera: ' + err.message + '. Make sure you granted camera permissions.');
     }
   };
 
