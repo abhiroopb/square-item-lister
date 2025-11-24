@@ -14,13 +14,19 @@ export function ItemForm() {
 
   const analyzeImage = async () => {
     const imagePath = item.enhancedPath || item.imagePath;
-    if (!imagePath) return;
+    if (!imagePath) {
+      console.log('No image path available for analysis');
+      return;
+    }
+
+    console.log('Starting AI analysis for image:', imagePath);
 
     try {
       setLoading(true);
       setError(null);
 
       const result = await api.analyzeImage(imagePath);
+      console.log('AI analysis result:', result);
       
       if (result.success) {
         updateItem({
@@ -28,11 +34,16 @@ export function ItemForm() {
           description: result.description,
           price: result.suggestedPrice || 0
         });
+        console.log('Item updated with AI results');
       } else {
-        setError('Failed to analyze image');
+        const errorMsg = 'Failed to analyze image: ' + (result.error || 'Unknown error');
+        console.error(errorMsg);
+        setError(errorMsg);
       }
     } catch (err) {
-      setError('Error analyzing image: ' + err.message);
+      const errorMsg = 'Error analyzing image: ' + err.message;
+      console.error(errorMsg, err);
+      setError(errorMsg);
     } finally {
       setLoading(false);
     }

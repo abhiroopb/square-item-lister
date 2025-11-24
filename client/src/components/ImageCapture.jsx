@@ -78,27 +78,35 @@ export function ImageCapture() {
     try {
       setLoading(true);
       setError(null);
+      console.log('Uploading file:', file.name);
 
       // Create preview
       const reader = new FileReader();
       reader.onload = (e) => {
         updateItem({ originalImage: e.target.result });
+        console.log('Preview image loaded');
       };
       reader.readAsDataURL(file);
 
       // Upload to server
       const uploadResult = await api.uploadImage(file);
+      console.log('Upload result:', uploadResult);
       
       if (uploadResult.success) {
         updateItem({ 
           imagePath: uploadResult.imagePath,
           filename: uploadResult.filename 
         });
+        console.log('Image path updated:', uploadResult.imagePath);
       } else {
-        setError('Failed to upload image');
+        const errorMsg = 'Failed to upload image: ' + (uploadResult.error || 'Unknown error');
+        console.error(errorMsg);
+        setError(errorMsg);
       }
     } catch (err) {
-      setError('Error uploading image: ' + err.message);
+      const errorMsg = 'Error uploading image: ' + err.message;
+      console.error(errorMsg, err);
+      setError(errorMsg);
     } finally {
       setLoading(false);
     }
