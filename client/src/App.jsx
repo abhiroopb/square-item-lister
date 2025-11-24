@@ -10,7 +10,6 @@ import './App.css';
 function App() {
   const [hasApiKeys, setHasApiKeys] = useState(false);
   const [isChangingKeys, setIsChangingKeys] = useState(false);
-  const [savedKeys, setSavedKeys] = useState(null);
 
   useEffect(() => {
     // Check if API keys are already stored
@@ -22,32 +21,20 @@ function App() {
   const handleApiKeysSubmit = () => {
     setHasApiKeys(true);
     setIsChangingKeys(false);
-    setSavedKeys(null);
   };
 
   const handleResetKeys = () => {
-    // Save current keys before removing
-    const squareToken = localStorage.getItem('squareToken');
-    const openaiKey = localStorage.getItem('openaiKey');
-    setSavedKeys({ squareToken, openaiKey });
-    
-    // Remove keys and show setup
-    localStorage.removeItem('squareToken');
-    localStorage.removeItem('openaiKey');
+    // Don't remove keys, just show the setup form
+    // Keys will still be in localStorage so the form can show masked placeholders
     setHasApiKeys(false);
     setIsChangingKeys(true);
   };
 
   const handleCancelKeySetup = () => {
-    // Restore saved keys
-    if (savedKeys) {
-      localStorage.setItem('squareToken', savedKeys.squareToken);
-      localStorage.setItem('openaiKey', savedKeys.openaiKey);
-    }
     // User cancelled, go back to main app with existing keys
+    // Keys are still in localStorage, so just restore the UI state
     setHasApiKeys(true);
     setIsChangingKeys(false);
-    setSavedKeys(null);
   };
 
   return (
