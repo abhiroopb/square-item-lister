@@ -24,9 +24,18 @@ export async function enhanceImage(imagePath, userOpenAIKey) {
   try {
     const enhancedPath = imagePath.replace(/(\.\w+)$/, '-enhanced.png');
     
-    console.log('Enhancing image with professional processing...');
+    console.log('=== IMAGE ENHANCEMENT START ===');
     console.log('Input path:', imagePath);
     console.log('Output path:', enhancedPath);
+    
+    // Check if input file exists
+    try {
+      await fs.access(imagePath);
+      console.log('✓ Input file exists');
+    } catch (err) {
+      console.error('✗ Input file does NOT exist');
+      throw new Error(`Input file not found: ${imagePath}`);
+    }
     
     // Professional enhancement using Sharp
     // This preserves the original product exactly while improving quality
@@ -52,8 +61,23 @@ export async function enhanceImage(imagePath, userOpenAIKey) {
       .flatten({ background: { r: 255, g: 255, b: 255 } })
       .toFile(enhancedPath);
     
+    console.log('✓ Enhanced image saved');
+    
+    // Verify the enhanced file was created
+    try {
+      await fs.access(enhancedPath);
+      const stats = await fs.stat(enhancedPath);
+      console.log('✓ Enhanced file exists, size:', stats.size, 'bytes');
+    } catch (err) {
+      console.error('✗ Enhanced file was NOT created');
+      throw new Error(`Failed to create enhanced file: ${enhancedPath}`);
+    }
+    
     // Return just the filename for the frontend
     const filename = enhancedPath.split('/').pop();
+    
+    console.log('Returning enhancedPath:', `/uploads/${filename}`);
+    console.log('=== IMAGE ENHANCEMENT END ===');
     
     return {
       success: true,
@@ -62,7 +86,9 @@ export async function enhanceImage(imagePath, userOpenAIKey) {
       message: 'Image enhanced with professional processing'
     };
   } catch (error) {
-    console.error('Error enhancing image:', error);
+    console.error('=== IMAGE ENHANCEMENT ERROR ===');
+    console.error('Error:', error.message);
+    console.error('=== END ERROR ===');
     return {
       success: false,
       error: error.message

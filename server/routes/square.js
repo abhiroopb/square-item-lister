@@ -46,28 +46,26 @@ router.post('/create-item', async (req, res) => {
       });
     }
 
-    // Convert relative path to absolute path
-    console.log('=== PATH CONVERSION DEBUG ===');
-    console.log('__dirname:', __dirname);
-    console.log('imagePath from frontend:', imagePath);
-    console.log('path.isAbsolute(imagePath):', path.isAbsolute(imagePath));
-    console.log('imagePath.startsWith("/uploads/"):', imagePath.startsWith('/uploads/'));
-    
+    // Convert URL path to filesystem path
+    // The frontend sends paths like '/uploads/filename.png' which are URL paths
+    // We need to convert these to absolute filesystem paths like '/app/uploads/filename.png'
     let fullImagePath;
+    
     if (imagePath.startsWith('/uploads/')) {
+      // This is a URL path from the frontend, convert to filesystem path
       const filename = path.basename(imagePath);
       fullImagePath = path.join(__dirname, '../uploads', filename);
-      console.log('Converted using /uploads/ logic');
-    } else if (path.isAbsolute(imagePath)) {
-      fullImagePath = imagePath;
-      console.log('Already absolute path');
+      console.log('Path conversion:', { imagePath, fullImagePath });
+    } else if (imagePath.includes('/uploads/')) {
+      // Handle cases like 'uploads/filename.png' or './uploads/filename.png'
+      const filename = path.basename(imagePath);
+      fullImagePath = path.join(__dirname, '../uploads', filename);
+      console.log('Path conversion:', { imagePath, fullImagePath });
     } else {
-      fullImagePath = path.join(__dirname, '..', imagePath);
-      console.log('Converted using relative logic');
+      // Assume it's already an absolute filesystem path
+      fullImagePath = imagePath;
+      console.log('Using path as-is:', fullImagePath);
     }
-    
-    console.log('Final fullImagePath:', fullImagePath);
-    console.log('=== END PATH CONVERSION ===');
 
     const result = await createCompleteItem(
       { title, description, price },
