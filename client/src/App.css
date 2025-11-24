@@ -250,6 +250,31 @@ body {
 }
 
 /* Image Capture */
+.image-capture {
+  min-height: 60vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  transition: var(--sq-transition);
+}
+
+.image-capture.has-content {
+  min-height: auto;
+  justify-content: flex-start;
+  align-items: stretch;
+}
+
+.image-capture .page-title {
+  transition: var(--sq-transition);
+}
+
+.image-capture.has-content .page-title {
+  font-size: 24px;
+  margin-bottom: 24px;
+  text-align: left;
+}
+
 .upload-options {
   display: flex;
   gap: 15px;

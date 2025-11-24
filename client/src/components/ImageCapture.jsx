@@ -3,7 +3,7 @@ import { useItem } from '../context/ItemContext';
 import { api } from '../services/api';
 
 export function ImageCapture() {
-  const { updateItem, setLoading, setError } = useItem();
+  const { item, updateItem, setLoading, setError } = useItem();
   const [useCamera, setUseCamera] = useState(false);
   const [stream, setStream] = useState(null);
   const videoRef = useRef(null);
@@ -154,8 +154,11 @@ export function ImageCapture() {
     }
   };
 
+  // Determine if we have content (image uploaded)
+  const hasContent = item.originalImage || item.imagePath;
+
   return (
-    <div className="image-capture">
+    <div className={`image-capture ${hasContent ? 'has-content' : ''}`}>
       <h1 className="page-title">Capture or upload the image of your item</h1>
       
       {!useCamera ? (
