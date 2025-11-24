@@ -6,11 +6,11 @@ export function ItemForm() {
   const { item, updateItem, setLoading, setError } = useItem();
 
   useEffect(() => {
-    // Auto-analyze when enhanced image is ready
-    if (item.enhancedPath && !item.title) {
+    // Auto-analyze when enhanced image is ready OR when original image is uploaded
+    if ((item.enhancedPath || item.imagePath) && !item.title) {
       analyzeImage();
     }
-  }, [item.enhancedPath]);
+  }, [item.enhancedPath, item.imagePath]);
 
   const analyzeImage = async () => {
     const imagePath = item.enhancedPath || item.imagePath;

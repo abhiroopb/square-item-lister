@@ -34,7 +34,7 @@ export function ImagePreview() {
 
   return (
     <div className="image-preview">
-      <h2>✨ Step 2: Enhance Image</h2>
+      <h2>✨ Enhance Image (Optional)</h2>
       
       <div className="image-comparison">
         <div className="image-box">

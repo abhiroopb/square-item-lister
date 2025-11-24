@@ -106,7 +106,7 @@ export function ImageCapture() {
 
   return (
     <div className="image-capture">
-      <h2>📸 Step 1: Capture or Upload Image</h2>
+      <h2>📸 Step 2: Capture or Upload Image</h2>
       
       {!useCamera ? (
         <div className="upload-options">
