@@ -119,8 +119,13 @@ export function ImageCapture() {
       console.log('Enhance result:', enhanceResult);
       
       if (enhanceResult.success) {
-        // Load enhanced image
-        const enhancedUrl = `${import.meta.env.VITE_API_URL || '/api'}/uploads/${enhanceResult.enhancedPath.split('/').pop()}`;
+        // Load enhanced image - construct proper URL
+        const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+        const filename = enhanceResult.enhancedPath.split('/').pop();
+        const enhancedUrl = apiBase.replace('/api', '') + '/uploads/' + filename;
+        
+        console.log('Enhanced image URL:', enhancedUrl);
+        
         updateItem({ 
           imagePath: imagePath,
           enhancedImage: enhancedUrl,
