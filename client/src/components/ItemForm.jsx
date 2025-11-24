@@ -208,13 +208,19 @@ export function ItemForm() {
       {item.squareItemId && (
         <div className="form-actions">
           <a 
-            href={`https://app.squareupsandbox.com/dashboard/items/library/${item.squareItemId}`}
+            href="https://developer.squareup.com/apps"
             target="_blank"
             rel="noopener noreferrer"
             className="btn btn-primary"
           >
-            📦 View Item in Square
+            📦 View Item in Square Sandbox
           </a>
+          <p style={{ fontSize: '14px', color: '#666', marginTop: '8px', textAlign: 'center' }}>
+            1. Click the link above to go to Square Developer Dashboard<br/>
+            2. Click "Open" next to your Sandbox test account<br/>
+            3. Go to Items & Orders → Items Library<br/>
+            4. Find your item: <strong>{item.title}</strong>
+          </p>
         </div>
       )}
 
