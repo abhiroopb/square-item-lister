@@ -19,6 +19,7 @@ export function ItemProvider({ children }) {
     price: 0,
     imagePath: null,
     enhancedPath: null,
+    squareItemId: null,
   });
 
   const [loading, setLoading] = useState(false);
@@ -38,6 +39,7 @@ export function ItemProvider({ children }) {
       price: 0,
       imagePath: null,
       enhancedPath: null,
+      squareItemId: null,
     });
     setError(null);
     setSuccess(null);

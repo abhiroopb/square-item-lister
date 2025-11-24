@@ -65,6 +65,7 @@ export function ItemForm() {
       });
 
       if (result.success) {
+        updateItem({ squareItemId: result.itemId });
         setSuccess(`✅ Item created successfully! Item ID: ${result.itemId}`);
       } else {
         setError('Failed to create item in Square: ' + result.error);
@@ -130,9 +131,20 @@ export function ItemForm() {
       </form>
 
       <div className="form-actions">
-        <button onClick={handlePublish} className="btn btn-success">
-          🚀 Create Square Listing
-        </button>
+        {!item.squareItemId ? (
+          <button onClick={handlePublish} className="btn btn-success">
+            🚀 Create Square Listing
+          </button>
+        ) : (
+          <a 
+            href={`https://app.squareupsandbox.com/dashboard/items/library/${item.squareItemId}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn btn-primary"
+          >
+            📦 View Item in Square
+          </a>
+        )}
       </div>
 
       <div className="reset-section">
