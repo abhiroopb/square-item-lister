@@ -257,17 +257,26 @@ async function uploadImageToItem(imagePath, itemId, itemName, userToken = null) 
     });
     
     const idempotencyKey = uuidv4();
+    const imageId = `#IMAGE_${Date.now()}`;
     
-    // Create request with objectId pointing to the item
+    // Create request with image object - required by Square SDK
     const request = {
       idempotencyKey: idempotencyKey,
       objectId: itemId, // Attach to existing item
+      image: {
+        type: 'IMAGE',
+        id: imageId,
+        imageData: {
+          caption: itemName || 'Product Image'
+        }
+      },
       isPrimary: true // Make this the primary image
     };
     
     console.log('Uploading image with request:', {
       idempotencyKey,
       objectId: itemId,
+      imageId: imageId,
       isPrimary: true,
       contentType
     });
