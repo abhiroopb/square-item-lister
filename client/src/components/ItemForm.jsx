@@ -136,7 +136,7 @@ export function ItemForm() {
       </div>
 
       <div className="reset-section">
-        <button onClick={handleReset} className="btn-link">
+        <button onClick={handleReset} className="btn btn-secondary">
           Start over with a new item
         </button>
       </div>
