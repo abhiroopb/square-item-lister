@@ -25,6 +25,8 @@ export async function enhanceImage(imagePath, userOpenAIKey) {
     const enhancedPath = imagePath.replace(/(\.\w+)$/, '-enhanced.png');
     
     console.log('Enhancing image with professional processing...');
+    console.log('Input path:', imagePath);
+    console.log('Output path:', enhancedPath);
     
     // Professional enhancement using Sharp
     // This preserves the original product exactly while improving quality
