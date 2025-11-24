@@ -3,7 +3,6 @@ import { ItemProvider } from './context/ItemContext';
 import { ImageCapture } from './components/ImageCapture';
 import { ImagePreview } from './components/ImagePreview';
 import { ItemForm } from './components/ItemForm';
-import { SquarePublish } from './components/SquarePublish';
 import { StatusBar } from './components/StatusBar';
 import { ApiKeySetup } from './components/ApiKeySetup';
 import './App.css';
@@ -69,7 +68,6 @@ function App() {
               <ImageCapture />
               <ImagePreview />
               <ItemForm />
-              <SquarePublish />
             </main>
             <footer className="app-footer">
               <p>© 2024 Square, Inc. • Powered by OpenAI & Square API</p>

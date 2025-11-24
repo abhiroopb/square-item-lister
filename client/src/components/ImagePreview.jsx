@@ -50,15 +50,6 @@ export function ImagePreview() {
 
   return (
     <div className="image-preview">
-      <div className="preview-header">
-        <h2>✨ Studio Quality Image</h2>
-        {item.enhancedImage && (
-          <button onClick={handleRegenerate} className="btn btn-secondary">
-            🔄 Regenerate
-          </button>
-        )}
-      </div>
-      
       <div className="image-comparison">
         <div className="image-box">
           <h3>Original</h3>
@@ -72,6 +63,14 @@ export function ImagePreview() {
           </div>
         )}
       </div>
+      
+      {item.enhancedImage && (
+        <div className="regenerate-section">
+          <button onClick={handleRegenerate} className="btn btn-secondary">
+            🔄 Regenerate Image
+          </button>
+        </div>
+      )}
     </div>
   );
 }
