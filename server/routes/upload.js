@@ -52,12 +52,13 @@ router.post('/', upload.single('image'), async (req, res) => {
       return res.status(400).json({ error: 'No image file provided' });
     }
 
-    const imagePath = req.file.path;
+    // Return relative path for frontend, keep absolute path for backend
+    const relativePath = `/uploads/${req.file.filename}`;
 
     res.json({
       success: true,
       message: 'Image uploaded successfully',
-      imagePath,
+      imagePath: relativePath,  // Relative path for frontend
       filename: req.file.filename
     });
   } catch (error) {
