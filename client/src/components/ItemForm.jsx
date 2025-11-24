@@ -87,71 +87,59 @@ export function ItemForm() {
   };
 
   if (!item.originalImage) return null;
+  if (!item.title) return null; // Don't show anything until AI generates details
 
   return (
     <div className="item-form">
-      {!item.title && (
-        <button onClick={analyzeImage} className="btn btn-primary">
-          🔍 Generate with AI
+      <form className="item-details-form">
+        <div className="form-group">
+          <label htmlFor="title">Item Title</label>
+          <input
+            id="title"
+            type="text"
+            value={item.title}
+            onChange={(e) => handleChange('title', e.target.value)}
+            placeholder="Enter item title"
+            maxLength={100}
+          />
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="price">Price ($)</label>
+          <input
+            id="price"
+            type="number"
+            value={item.price}
+            onChange={(e) => handleChange('price', parseFloat(e.target.value) || 0)}
+            placeholder="0.00"
+            step="0.01"
+            min="0"
+          />
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="description">Description</label>
+          <textarea
+            id="description"
+            value={item.description}
+            onChange={(e) => handleChange('description', e.target.value)}
+            placeholder="Enter item description"
+            rows={5}
+          />
+        </div>
+      </form>
+
+      <div className="form-actions">
+        <button onClick={handlePublish} className="btn btn-success">
+          🚀 Create Square Listing
         </button>
-      )}
+      </div>
 
-      {item.title && (
-        <>
-          <form className="item-details-form">
-            <div className="form-group">
-              <label htmlFor="title">Item Title</label>
-              <input
-                id="title"
-                type="text"
-                value={item.title}
-                onChange={(e) => handleChange('title', e.target.value)}
-                placeholder="Enter item title"
-                maxLength={100}
-              />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="price">Price ($)</label>
-              <input
-                id="price"
-                type="number"
-                value={item.price}
-                onChange={(e) => handleChange('price', parseFloat(e.target.value) || 0)}
-                placeholder="0.00"
-                step="0.01"
-                min="0"
-              />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="description">Description</label>
-              <textarea
-                id="description"
-                value={item.description}
-                onChange={(e) => handleChange('description', e.target.value)}
-                placeholder="Enter item description"
-                rows={5}
-              />
-            </div>
-          </form>
-
-          <div className="form-actions">
-            <button onClick={analyzeImage} className="btn btn-secondary">
-              🔄 Regenerate Details
-            </button>
-            <button onClick={handlePublish} className="btn btn-success">
-              🚀 Create Square Listing
-            </button>
-          </div>
-
-          <div className="reset-section">
-            <button onClick={handleReset} className="btn-link">
-              Start over with a new item
-            </button>
-          </div>
-        </>
-      )}
+      <div className="reset-section">
+        <button onClick={handleReset} className="btn-link">
+          Start over with a new item
+        </button>
+      </div>
     </div>
   );
 }

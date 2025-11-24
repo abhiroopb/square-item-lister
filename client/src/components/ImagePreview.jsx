@@ -68,14 +68,6 @@ export function ImagePreview() {
           </div>
         )}
       </div>
-      
-      {item.enhancedImage && (
-        <div className="regenerate-section">
-          <button onClick={handleRegenerate} className="btn btn-secondary">
-            🔄 Regenerate Image
-          </button>
-        </div>
-      )}
     </div>
   );
 }
