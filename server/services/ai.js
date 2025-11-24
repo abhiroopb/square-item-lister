@@ -79,20 +79,33 @@ export async function enhanceImage(imagePath) {
     }
     
     // Fallback: Basic enhancement without background removal
+    // Apply more aggressive enhancements to make a visible difference
     await sharp(imagePath)
       .resize(1200, 1200, { 
         fit: 'inside',
-        withoutEnlargement: true 
+        withoutEnlargement: true,
+        background: { r: 255, g: 255, b: 255, alpha: 1 }
+      })
+      .extend({
+        top: 50,
+        bottom: 50,
+        left: 50,
+        right: 50,
+        background: { r: 255, g: 255, b: 255, alpha: 1 }
+      })
+      .modulate({
+        brightness: 1.1,  // Increase brightness by 10%
+        saturation: 1.2   // Increase saturation by 20%
       })
       .normalize() // Auto-adjust brightness/contrast
-      .sharpen() // Enhance sharpness
+      .sharpen({ sigma: 1.5 }) // More aggressive sharpening
       .flatten({ background: { r: 255, g: 255, b: 255 } }) // Add white background
       .toFile(enhancedPath);
     
     return {
       success: true,
       enhancedPath,
-      message: 'Image enhanced successfully'
+      message: 'Image enhanced with studio lighting and white border'
     };
   } catch (error) {
     console.error('Error enhancing image:', error);
