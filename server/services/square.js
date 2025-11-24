@@ -85,11 +85,20 @@ export async function createCatalogItem(itemData, userToken = null) {
 /**
  * Upload image to Square
  */
-export async function uploadImage(imagePath, itemName) {
+export async function uploadImage(imagePath, itemName, userToken = null) {
   try {
-    const imageFile = await fs.readFile(imagePath);
+    const client = getSquareClient(userToken);
+    const imageBuffer = await fs.readFile(imagePath);
     
-    // The Square SDK expects a FileWrapper object
+    // Create a FileWrapper-like object for the Square SDK
+    const imageFile = {
+      value: imageBuffer,
+      options: {
+        filename: 'item-image.jpg',
+        contentType: 'image/jpeg'
+      }
+    };
+    
     const request = {
       idempotencyKey: uuidv4(),
       image: {
@@ -102,6 +111,7 @@ export async function uploadImage(imagePath, itemName) {
       imageFile: imageFile
     };
     
+    console.log('Uploading image to Square...');
     const response = await client.catalogApi.createCatalogImage(request);
 
     return {
@@ -125,9 +135,30 @@ export async function uploadImage(imagePath, itemName) {
  */
 export async function createCompleteItem(itemData, imagePath, userToken = null) {
   try {
-    // For now, create item without image due to Square SDK multipart/form-data issue
-    // TODO: Fix image upload with proper multipart handling
-    console.log('Creating item without image (image upload needs fixing)');
+    console.log('Starting complete item creation with image upload...');
+    
+    // Step 1: Upload image if path provided
+    let imageId = null;
+    let imageUrl = null;
+    
+    if (imagePath) {
+      console.log('Uploading image:', imagePath);
+      const imageResult = await uploadImage(imagePath, itemData.title, userToken);
+      
+      if (imageResult.success) {
+        imageId = imageResult.imageId;
+        imageUrl = imageResult.imageUrl;
+        console.log('Image uploaded successfully:', imageId);
+      } else {
+        console.warn('Image upload failed, creating item without image:', imageResult.error);
+        // Continue without image - don't fail the entire operation
+      }
+    }
+
+    // Step 2: Create catalog item (with image if uploaded)
+    if (imageId) {
+      itemData.imageId = imageId;
+    }
     
     const itemResult = await createCatalogItem(itemData, userToken);
 
@@ -143,39 +174,9 @@ export async function createCompleteItem(itemData, imagePath, userToken = null) 
       success: true,
       item: itemResult.catalogObject,
       itemId: itemResult.itemId,
-      imageUrl: null,
-      note: 'Item created successfully. Image upload temporarily disabled - working on fix.'
+      imageUrl: imageUrl,
+      imageUploaded: !!imageId
     };
-    
-    /* Original image upload code - needs fixing
-    // Step 1: Upload image
-    const imageResult = await uploadImage(imagePath, itemData.title);
-    
-    if (!imageResult.success) {
-      console.warn('Image upload failed, creating item without image');
-      // Continue without image
-    } else {
-      itemData.imageId = imageResult.imageId;
-    }
-
-    // Step 2: Create catalog item
-    const itemResult = await createCatalogItem(itemData);
-
-    if (!itemResult.success) {
-      return {
-        success: false,
-        error: 'Failed to create catalog item',
-        details: itemResult.error
-      };
-    }
-
-    return {
-      success: true,
-      item: itemResult.catalogObject,
-      itemId: itemResult.itemId,
-      imageUrl: imageResult?.imageUrl
-    };
-    */
   } catch (error) {
     console.error('Error in complete item creation:', error);
     return {

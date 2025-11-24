@@ -1,5 +1,10 @@
 import express from 'express';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { createCompleteItem, listCatalogItems } from '../services/square.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const router = express.Router();
 
@@ -41,9 +46,23 @@ router.post('/create-item', async (req, res) => {
       });
     }
 
+    // Convert relative path to absolute path if needed
+    let fullImagePath = imagePath;
+    if (!path.isAbsolute(imagePath)) {
+      // If it's a relative path like '/uploads/filename.jpg', convert to absolute
+      if (imagePath.startsWith('/uploads/')) {
+        const filename = path.basename(imagePath);
+        fullImagePath = path.join(__dirname, '../uploads', filename);
+      } else {
+        fullImagePath = path.join(__dirname, '..', imagePath);
+      }
+    }
+
+    console.log('Image path conversion:', { imagePath, fullImagePath });
+
     const result = await createCompleteItem(
       { title, description, price },
-      imagePath,
+      fullImagePath,
       userSquareToken
     );
 
