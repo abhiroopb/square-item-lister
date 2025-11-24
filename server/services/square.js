@@ -1,7 +1,8 @@
-import { Client, Environment } from 'square';
+import { Client, Environment, FileWrapper } from 'square';
 import { config } from '../config/config.js';
 import { v4 as uuidv4 } from 'uuid';
 import fs from 'fs/promises';
+import { createReadStream } from 'fs';
 
 // Helper to get Square client with user's token or default
 function getSquareClient(userToken) {
@@ -88,16 +89,15 @@ export async function createCatalogItem(itemData, userToken = null) {
 export async function uploadImage(imagePath, itemName, userToken = null) {
   try {
     const client = getSquareClient(userToken);
+    
+    // Read the image file as a buffer
     const imageBuffer = await fs.readFile(imagePath);
     
-    // Create a FileWrapper-like object for the Square SDK
-    const imageFile = {
-      value: imageBuffer,
-      options: {
-        filename: 'item-image.jpg',
-        contentType: 'image/jpeg'
-      }
-    };
+    // Use Square's FileWrapper to properly format the file
+    const imageFile = new FileWrapper(imageBuffer, {
+      filename: 'item-image.jpg',
+      contentType: 'image/jpeg'
+    });
     
     const request = {
       idempotencyKey: uuidv4(),
@@ -111,8 +111,13 @@ export async function uploadImage(imagePath, itemName, userToken = null) {
       imageFile: imageFile
     };
     
-    console.log('Uploading image to Square...');
+    console.log('Uploading image to Square with FileWrapper...');
+    console.log('Image path:', imagePath);
+    console.log('Image buffer size:', imageBuffer.length);
+    
     const response = await client.catalogApi.createCatalogImage(request);
+    
+    console.log('Image upload response:', JSON.stringify(response.result, null, 2));
 
     return {
       success: true,
