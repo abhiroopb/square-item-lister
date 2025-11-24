@@ -146,6 +146,12 @@
   flex-shrink: 0;
 }
 
+.form-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+}
+
 .submit-btn {
   background: var(--sq-blue);
   color: var(--sq-white);
@@ -162,7 +168,7 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  margin-top: 8px;
+  flex: 1;
 }
 
 .submit-btn:hover:not(:disabled) {
@@ -177,6 +183,32 @@
 .submit-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+.cancel-btn {
+  background: var(--sq-white);
+  color: var(--sq-gray-700);
+  border: 1px solid var(--sq-gray-300);
+  padding: 14px 24px;
+  border-radius: var(--sq-radius-md);
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--sq-transition);
+  font-family: var(--sq-font-family);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.cancel-btn:hover {
+  background: var(--sq-gray-50);
+  border-color: var(--sq-gray-400);
+}
+
+.cancel-btn:active {
+  transform: translateY(1px);
 }
 
 .setup-info {

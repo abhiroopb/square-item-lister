@@ -27,6 +27,11 @@ function App() {
     setHasApiKeys(false);
   };
 
+  const handleCancelKeySetup = () => {
+    // User cancelled, go back to main app with existing keys
+    setHasApiKeys(true);
+  };
+
   return (
     <ItemProvider>
       <div className="app">
@@ -60,7 +65,7 @@ function App() {
         </header>
         
         {!hasApiKeys ? (
-          <ApiKeySetup onSubmit={handleApiKeysSubmit} />
+          <ApiKeySetup onSubmit={handleApiKeysSubmit} onCancel={handleCancelKeySetup} />
         ) : (
           <>
             <StatusBar />

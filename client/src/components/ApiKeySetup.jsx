@@ -1,10 +1,18 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import './ApiKeySetup.css';
 
-export function ApiKeySetup({ onSubmit }) {
+export function ApiKeySetup({ onSubmit, onCancel }) {
   const [squareToken, setSquareToken] = useState('');
   const [openaiKey, setOpenaiKey] = useState('');
   const [error, setError] = useState('');
+  const [hasExistingKeys, setHasExistingKeys] = useState(false);
+
+  useEffect(() => {
+    // Check if keys already exist
+    const existingSquare = localStorage.getItem('squareToken');
+    const existingOpenai = localStorage.getItem('openaiKey');
+    setHasExistingKeys(!!existingSquare && !!existingOpenai);
+  }, []);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -31,10 +39,7 @@ export function ApiKeySetup({ onSubmit }) {
     <div className="api-key-setup">
       <div className="setup-container">
         <div className="setup-header">
-          <h2>
-            <span className="step-indicator">1</span>
-            Configure API Keys
-          </h2>
+          <h2>Configure API Keys</h2>
           <p>Enter your API credentials to get started</p>
         </div>
 
@@ -91,9 +96,16 @@ export function ApiKeySetup({ onSubmit }) {
 
           {error && <div className="error-message">{error}</div>}
 
-          <button type="submit" className="submit-btn">
-            Continue to Image Upload →
-          </button>
+          <div className="form-actions">
+            <button type="submit" className="submit-btn">
+              Continue to Image Upload →
+            </button>
+            {hasExistingKeys && onCancel && (
+              <button type="button" onClick={onCancel} className="cancel-btn">
+                Cancel
+              </button>
+            )}
+          </div>
         </form>
 
         <div className="setup-info">
