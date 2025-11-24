@@ -120,28 +120,18 @@ export async function uploadImage(imagePath, itemName, userToken = null) {
       contentType: contentType
     });
     
-    // The request object should NOT include imageFile
-    // imageFile is passed as a separate parameter
+    const idempotencyKey = uuidv4();
+    
+    // Minimal request - let Square generate the image object
     const request = {
-      idempotencyKey: uuidv4(),
-      image: {
-        type: 'IMAGE',
-        id: `#TEMP_${uuidv4()}`,
-        imageData: {
-          caption: itemName || 'Product Image'
-        }
-      }
+      idempotencyKey: idempotencyKey
     };
     
-    console.log('Request structure:', {
-      idempotencyKey: request.idempotencyKey,
-      imageType: request.image.type,
-      imageId: request.image.id,
-      contentType: contentType,
-      bufferSize: imageBuffer.length
-    });
+    console.log('Calling Square createCatalogImage with minimal request...');
+    console.log('Idempotency key:', idempotencyKey);
+    console.log('Content type:', contentType);
+    console.log('Buffer size:', imageBuffer.length);
     
-    console.log('Calling Square createCatalogImage API...');
     // Pass request and imageFile as separate parameters
     const response = await client.catalogApi.createCatalogImage(request, imageFile);
     
