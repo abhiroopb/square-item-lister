@@ -121,14 +121,24 @@ export async function uploadImage(imagePath, itemName, userToken = null) {
     });
     
     const idempotencyKey = uuidv4();
+    const tempId = `#TEMP_IMAGE_${Date.now()}`;
     
-    // Minimal request - let Square generate the image object
+    // Request must include image object per Square SDK requirements
     const request = {
-      idempotencyKey: idempotencyKey
+      idempotencyKey: idempotencyKey,
+      objectId: tempId,
+      image: {
+        type: 'IMAGE',
+        id: tempId,
+        imageData: {
+          caption: itemName || 'Product Image'
+        }
+      }
     };
     
-    console.log('Calling Square createCatalogImage with minimal request...');
+    console.log('Calling Square createCatalogImage...');
     console.log('Idempotency key:', idempotencyKey);
+    console.log('Object ID:', tempId);
     console.log('Content type:', contentType);
     console.log('Buffer size:', imageBuffer.length);
     
