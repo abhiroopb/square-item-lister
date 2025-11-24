@@ -60,14 +60,20 @@ export function ImagePreview() {
   return (
     <div className="image-preview">
       <div className="image-comparison">
-        <div className="image-box">
-          <h3>Original</h3>
+        <div className={`image-box ${item.useOriginalImage ? 'selected' : ''}`}>
+          <h3>
+            Original
+            {item.useOriginalImage && <span className="selected-badge">✓ Selected for Square</span>}
+          </h3>
           <img src={item.originalImage} alt="Original" />
         </div>
         
         {item.enhancedImage && (
-          <div className="image-box">
-            <h3>Studio Quality</h3>
+          <div className={`image-box ${!item.useOriginalImage ? 'selected' : ''}`}>
+            <h3>
+              Studio Quality
+              {!item.useOriginalImage && <span className="selected-badge">✓ Selected for Square</span>}
+            </h3>
             <img src={item.enhancedImage} alt="Enhanced" />
           </div>
         )}
