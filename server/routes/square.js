@@ -46,19 +46,28 @@ router.post('/create-item', async (req, res) => {
       });
     }
 
-    // Convert relative path to absolute path if needed
-    let fullImagePath = imagePath;
-    if (!path.isAbsolute(imagePath)) {
-      // If it's a relative path like '/uploads/filename.jpg', convert to absolute
-      if (imagePath.startsWith('/uploads/')) {
-        const filename = path.basename(imagePath);
-        fullImagePath = path.join(__dirname, '../uploads', filename);
-      } else {
-        fullImagePath = path.join(__dirname, '..', imagePath);
-      }
+    // Convert relative path to absolute path
+    console.log('=== PATH CONVERSION DEBUG ===');
+    console.log('__dirname:', __dirname);
+    console.log('imagePath from frontend:', imagePath);
+    console.log('path.isAbsolute(imagePath):', path.isAbsolute(imagePath));
+    console.log('imagePath.startsWith("/uploads/"):', imagePath.startsWith('/uploads/'));
+    
+    let fullImagePath;
+    if (imagePath.startsWith('/uploads/')) {
+      const filename = path.basename(imagePath);
+      fullImagePath = path.join(__dirname, '../uploads', filename);
+      console.log('Converted using /uploads/ logic');
+    } else if (path.isAbsolute(imagePath)) {
+      fullImagePath = imagePath;
+      console.log('Already absolute path');
+    } else {
+      fullImagePath = path.join(__dirname, '..', imagePath);
+      console.log('Converted using relative logic');
     }
-
-    console.log('Image path conversion:', { imagePath, fullImagePath });
+    
+    console.log('Final fullImagePath:', fullImagePath);
+    console.log('=== END PATH CONVERSION ===');
 
     const result = await createCompleteItem(
       { title, description, price },
