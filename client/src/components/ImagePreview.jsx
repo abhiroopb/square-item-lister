@@ -4,12 +4,8 @@ import { api } from '../services/api';
 export function ImagePreview() {
   const { item, updateItem, setLoading, setError } = useItem();
 
-  const handleUseOriginal = () => {
-    // Use the original image instead of enhanced
-    updateItem({
-      enhancedImage: null,
-      enhancedPath: null
-    });
+  const handleToggleImage = () => {
+    updateItem({ useOriginalImage: !item.useOriginalImage });
   };
 
   const handleRegenerate = async () => {
@@ -79,8 +75,8 @@ export function ImagePreview() {
 
       {item.enhancedImage && (
         <div className="image-actions">
-          <button onClick={handleUseOriginal} className="btn btn-secondary">
-            Use Original Image
+          <button onClick={handleToggleImage} className="btn btn-secondary">
+            {item.useOriginalImage ? '✨ Use AI Enhanced Image' : '📷 Use Original Image'}
           </button>
         </div>
       )}

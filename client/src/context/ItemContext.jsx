@@ -20,6 +20,7 @@ export function ItemProvider({ children }) {
     imagePath: null,
     enhancedPath: null,
     squareItemId: null,
+    useOriginalImage: false,
   });
 
   const [loading, setLoading] = useState(false);
@@ -40,6 +41,7 @@ export function ItemProvider({ children }) {
       imagePath: null,
       enhancedPath: null,
       squareItemId: null,
+      useOriginalImage: false,
     });
     setError(null);
     setSuccess(null);

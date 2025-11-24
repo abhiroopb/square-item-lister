@@ -47,7 +47,11 @@ export function ItemForm() {
       return;
     }
 
-    const imagePath = item.enhancedPath || item.imagePath;
+    // Use original image if user toggled to it, otherwise use enhanced
+    const imagePath = item.useOriginalImage 
+      ? item.imagePath 
+      : (item.enhancedPath || item.imagePath);
+    
     if (!imagePath) {
       setError('No image available');
       return;
