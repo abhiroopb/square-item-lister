@@ -355,16 +355,48 @@ body {
 .selected-badge {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 4px;
   background: var(--sq-blue);
   color: var(--sq-white);
-  padding: 4px 12px;
-  border-radius: 12px;
-  font-size: 11px;
+  padding: 6px 16px;
+  border-radius: 16px;
+  font-size: 12px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  margin-top: 12px;
   animation: fadeIn 0.3s ease;
+}
+
+.regenerate-icon-btn {
+  background: none;
+  border: none;
+  color: var(--sq-gray-500);
+  cursor: pointer;
+  padding: 4px;
+  margin-left: 8px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--sq-transition);
+  width: 24px;
+  height: 24px;
+}
+
+.regenerate-icon-btn:hover {
+  color: var(--sq-blue);
+  background: var(--sq-blue-light);
+}
+
+.regenerate-icon-btn:active {
+  transform: rotate(180deg);
+}
+
+.regenerate-icon-btn svg {
+  width: 16px;
+  height: 16px;
 }
 
 .image-box img {

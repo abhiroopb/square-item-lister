@@ -4,38 +4,55 @@ import { api } from '../services/api';
 export function ItemForm() {
   const { item, updateItem, setLoading, setError, setSuccess, resetItem } = useItem();
 
-  const analyzeImage = async () => {
+  const regenerateTitle = async () => {
     const imagePath = item.enhancedPath || item.imagePath;
-    if (!imagePath) {
-      console.log('No image path available for analysis');
-      return;
-    }
-
-    console.log('Starting AI analysis for image:', imagePath);
+    if (!imagePath) return;
 
     try {
       setLoading(true);
       setError(null);
-
       const result = await api.analyzeImage(imagePath);
-      console.log('AI analysis result:', result);
-      
       if (result.success) {
-        updateItem({
-          title: result.title,
-          description: result.description,
-          price: result.suggestedPrice || 0
-        });
-        console.log('Item updated with AI results');
-      } else {
-        const errorMsg = 'Failed to analyze image: ' + (result.error || 'Unknown error');
-        console.error(errorMsg);
-        setError(errorMsg);
+        updateItem({ title: result.title });
       }
     } catch (err) {
-      const errorMsg = 'Error analyzing image: ' + err.message;
-      console.error(errorMsg, err);
-      setError(errorMsg);
+      setError('Error regenerating title: ' + err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const regenerateDescription = async () => {
+    const imagePath = item.enhancedPath || item.imagePath;
+    if (!imagePath) return;
+
+    try {
+      setLoading(true);
+      setError(null);
+      const result = await api.analyzeImage(imagePath);
+      if (result.success) {
+        updateItem({ description: result.description });
+      }
+    } catch (err) {
+      setError('Error regenerating description: ' + err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const regeneratePrice = async () => {
+    const imagePath = item.enhancedPath || item.imagePath;
+    if (!imagePath) return;
+
+    try {
+      setLoading(true);
+      setError(null);
+      const result = await api.analyzeImage(imagePath);
+      if (result.success) {
+        updateItem({ price: result.suggestedPrice || 0 });
+      }
+    } catch (err) {
+      setError('Error regenerating price: ' + err.message);
     } finally {
       setLoading(false);
     }
@@ -98,7 +115,19 @@ export function ItemForm() {
     <div className="item-form">
       <form className="item-details-form">
         <div className="form-group">
-          <label htmlFor="title">Item Title</label>
+          <label htmlFor="title">
+            Item Title
+            <button 
+              type="button"
+              onClick={regenerateTitle} 
+              className="regenerate-icon-btn"
+              title="Regenerate title"
+            >
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M13.65 2.35C12.2 0.9 10.21 0 8 0C3.58 0 0.01 3.58 0.01 8C0.01 12.42 3.58 16 8 16C11.73 16 14.84 13.45 15.73 10H13.65C12.83 12.33 10.61 14 8 14C4.69 14 2 11.31 2 8C2 4.69 4.69 2 8 2C9.66 2 11.14 2.69 12.22 3.78L9 7H16V0L13.65 2.35Z" fill="currentColor"/>
+              </svg>
+            </button>
+          </label>
           <input
             id="title"
             type="text"
@@ -110,7 +139,19 @@ export function ItemForm() {
         </div>
 
         <div className="form-group">
-          <label htmlFor="price">Price ($)</label>
+          <label htmlFor="price">
+            Price ($)
+            <button 
+              type="button"
+              onClick={regeneratePrice} 
+              className="regenerate-icon-btn"
+              title="Regenerate price"
+            >
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M13.65 2.35C12.2 0.9 10.21 0 8 0C3.58 0 0.01 3.58 0.01 8C0.01 12.42 3.58 16 8 16C11.73 16 14.84 13.45 15.73 10H13.65C12.83 12.33 10.61 14 8 14C4.69 14 2 11.31 2 8C2 4.69 4.69 2 8 2C9.66 2 11.14 2.69 12.22 3.78L9 7H16V0L13.65 2.35Z" fill="currentColor"/>
+              </svg>
+            </button>
+          </label>
           <input
             id="price"
             type="number"
@@ -123,7 +164,19 @@ export function ItemForm() {
         </div>
 
         <div className="form-group">
-          <label htmlFor="description">Description</label>
+          <label htmlFor="description">
+            Description
+            <button 
+              type="button"
+              onClick={regenerateDescription} 
+              className="regenerate-icon-btn"
+              title="Regenerate description"
+            >
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M13.65 2.35C12.2 0.9 10.21 0 8 0C3.58 0 0.01 3.58 0.01 8C0.01 12.42 3.58 16 8 16C11.73 16 14.84 13.45 15.73 10H13.65C12.83 12.33 10.61 14 8 14C4.69 14 2 11.31 2 8C2 4.69 4.69 2 8 2C9.66 2 11.14 2.69 12.22 3.78L9 7H16V0L13.65 2.35Z" fill="currentColor"/>
+              </svg>
+            </button>
+          </label>
           <textarea
             id="description"
             value={item.description}

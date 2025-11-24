@@ -61,20 +61,31 @@ export function ImagePreview() {
     <div className="image-preview">
       <div className="image-comparison">
         <div className={`image-box ${item.useOriginalImage ? 'selected' : ''}`}>
-          <h3>
-            Original
-            {item.useOriginalImage && <span className="selected-badge">✓ Selected for Square</span>}
-          </h3>
+          <h3>Original</h3>
           <img src={item.originalImage} alt="Original" />
+          {item.useOriginalImage && (
+            <div className="selected-badge">✓ Selected</div>
+          )}
         </div>
         
         {item.enhancedImage && (
           <div className={`image-box ${!item.useOriginalImage ? 'selected' : ''}`}>
             <h3>
               Studio Quality
-              {!item.useOriginalImage && <span className="selected-badge">✓ Selected for Square</span>}
+              <button 
+                onClick={handleRegenerate} 
+                className="regenerate-icon-btn"
+                title="Regenerate enhanced image"
+              >
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <path d="M13.65 2.35C12.2 0.9 10.21 0 8 0C3.58 0 0.01 3.58 0.01 8C0.01 12.42 3.58 16 8 16C11.73 16 14.84 13.45 15.73 10H13.65C12.83 12.33 10.61 14 8 14C4.69 14 2 11.31 2 8C2 4.69 4.69 2 8 2C9.66 2 11.14 2.69 12.22 3.78L9 7H16V0L13.65 2.35Z" fill="currentColor"/>
+                </svg>
+              </button>
             </h3>
             <img src={item.enhancedImage} alt="Enhanced" />
+            {!item.useOriginalImage && (
+              <div className="selected-badge">✓ Selected</div>
+            )}
           </div>
         )}
       </div>
