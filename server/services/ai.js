@@ -17,120 +17,48 @@ function getOpenAIClient(userKey) {
 }
 
 /**
- * Enhance image to studio quality using OpenAI DALL-E 3
- * Uses image editing to create a professional product photo
+ * Enhance image to studio quality
+ * Applies professional image processing to improve appearance while preserving the original product
  */
 export async function enhanceImage(imagePath, userOpenAIKey) {
   try {
-    const openai = getOpenAIClient(userOpenAIKey);
     const enhancedPath = imagePath.replace(/(\.\w+)$/, '-enhanced.png');
     
-    // Read the original image
-    const imageBuffer = await fs.readFile(imagePath);
-    const base64Image = imageBuffer.toString('base64');
-    const mimeType = imagePath.endsWith('.png') ? 'image/png' : 'image/jpeg';
+    console.log('Enhancing image with professional processing...');
     
-    console.log('Using OpenAI to enhance image...');
+    // Professional enhancement using Sharp
+    // This preserves the original product exactly while improving quality
+    await sharp(imagePath)
+      .resize(1200, 1200, { 
+        fit: 'inside',
+        withoutEnlargement: true,
+        background: { r: 255, g: 255, b: 255, alpha: 1 }
+      })
+      .extend({
+        top: 100,
+        bottom: 100,
+        left: 100,
+        right: 100,
+        background: { r: 255, g: 255, b: 255, alpha: 1 }
+      })
+      .modulate({
+        brightness: 1.15,  // Slightly brighter
+        saturation: 1.1    // Slightly more saturated
+      })
+      .normalize()         // Auto-adjust levels
+      .sharpen({ sigma: 2 })  // Sharper details
+      .flatten({ background: { r: 255, g: 255, b: 255 } })
+      .toFile(enhancedPath);
     
-    try {
-      // Use GPT-4 Vision to generate an enhanced prompt describing the product
-      const visionResponse = await openai.chat.completions.create({
-        model: 'gpt-4o',
-        messages: [
-          {
-            role: 'user',
-            content: [
-              {
-                type: 'text',
-                text: 'Describe ONLY the physical product in this image with extreme detail - exact colors, materials, text, labels, brand names, shape, size. Describe it exactly as it appears. Do not mention hands, background, or anything else. Be very specific about what makes this product unique. Max 150 words.'
-              },
-              {
-                type: 'image_url',
-                image_url: {
-                  url: `data:${mimeType};base64,${base64Image}`
-                }
-              }
-            ]
-          }
-        ],
-        max_tokens: 250
-      });
-      
-      const productDescription = visionResponse.choices[0].message.content.trim();
-      console.log('Product description:', productDescription);
-      
-      // Generate a studio-quality product photo using DALL-E 3
-      const dalleResponse = await openai.images.generate({
-        model: 'dall-e-3',
-        prompt: `Professional product photography of exactly this product: ${productDescription}. The product must look IDENTICAL to the description - same colors, same labels, same text, same everything. Pure white background, professional studio lighting with soft shadows, centered composition, high-resolution commercial photography. The product should be the ONLY thing visible - no hands, no people, no other objects.`,
-        n: 1,
-        size: '1024x1024',
-        quality: 'hd',
-        style: 'natural'
-      });
-      
-      const imageUrl = dalleResponse.data[0].url;
-      console.log('Generated enhanced image URL:', imageUrl);
-      
-      // Download the enhanced image
-      const axios = (await import('axios')).default;
-      const response = await axios.get(imageUrl, { responseType: 'arraybuffer' });
-      
-      // Save and resize to consistent dimensions
-      await sharp(Buffer.from(response.data))
-        .resize(1200, 1200, { 
-          fit: 'inside',
-          withoutEnlargement: true,
-          background: { r: 255, g: 255, b: 255, alpha: 1 }
-        })
-        .toFile(enhancedPath);
-      
-      // Return just the filename for the frontend
-      const filename = enhancedPath.split('/').pop();
-      
-      return {
-        success: true,
-        enhancedPath: `/uploads/${filename}`,  // Relative path for frontend
-        absolutePath: enhancedPath,  // Keep absolute path for server use
-        message: 'Image enhanced with OpenAI DALL-E 3'
-      };
-      
-    } catch (openaiError) {
-      console.warn('OpenAI enhancement failed, using fallback:', openaiError.message);
-      
-      // Fallback: Basic enhancement with Sharp
-      await sharp(imagePath)
-        .resize(1200, 1200, { 
-          fit: 'inside',
-          withoutEnlargement: true,
-          background: { r: 255, g: 255, b: 255, alpha: 1 }
-        })
-        .extend({
-          top: 50,
-          bottom: 50,
-          left: 50,
-          right: 50,
-          background: { r: 255, g: 255, b: 255, alpha: 1 }
-        })
-        .modulate({
-          brightness: 1.1,
-          saturation: 1.2
-        })
-        .normalize()
-        .sharpen({ sigma: 1.5 })
-        .flatten({ background: { r: 255, g: 255, b: 255 } })
-        .toFile(enhancedPath);
-      
-      // Return just the filename for the frontend
-      const filename = enhancedPath.split('/').pop();
-      
-      return {
-        success: true,
-        enhancedPath: `/uploads/${filename}`,  // Relative path for frontend
-        absolutePath: enhancedPath,  // Keep absolute path for server use
-        message: 'Image enhanced with basic processing'
-      };
-    }
+    // Return just the filename for the frontend
+    const filename = enhancedPath.split('/').pop();
+    
+    return {
+      success: true,
+      enhancedPath: `/uploads/${filename}`,  // Relative path for frontend
+      absolutePath: enhancedPath,  // Keep absolute path for server use
+      message: 'Image enhanced with professional processing'
+    };
   } catch (error) {
     console.error('Error enhancing image:', error);
     return {
