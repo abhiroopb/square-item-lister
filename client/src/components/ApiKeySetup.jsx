@@ -52,7 +52,7 @@ export function ApiKeySetup({ onSubmit, onCancel, showCancel = false }) {
             <small className="form-hint">
               Get your token from the{' '}
               <a 
-                href="https://developer.squareup.com/apps" 
+                href="https://squareup.com/login?return_to=https%3A%2F%2Fdeveloper.squareup.com%2Fapps" 
                 target="_blank" 
                 rel="noopener noreferrer"
               >
