@@ -121,29 +121,23 @@ export async function uploadImage(imagePath, itemName, userToken = null) {
     });
     
     const idempotencyKey = uuidv4();
-    const tempId = `#TEMP_IMAGE_${Date.now()}`;
     
-    // Request must include image object per Square SDK requirements
+    // Don't include image object - just idempotency key
+    // The SDK will handle creating the image object from the file
     const request = {
-      idempotencyKey: idempotencyKey,
-      objectId: tempId,
-      image: {
-        type: 'IMAGE',
-        id: tempId,
-        imageData: {
-          caption: itemName || 'Product Image'
-        }
-      }
+      idempotencyKey: idempotencyKey
     };
     
     console.log('Calling Square createCatalogImage...');
     console.log('Idempotency key:', idempotencyKey);
-    console.log('Object ID:', tempId);
     console.log('Content type:', contentType);
     console.log('Buffer size:', imageBuffer.length);
     
-    // Pass request and imageFile as separate parameters
-    const response = await client.catalogApi.createCatalogImage(request, imageFile);
+    // Try calling with just the file, no request object
+    const response = await client.catalogApi.createCatalogImage(
+      request,
+      imageFile
+    );
     
     console.log('✓ Image upload SUCCESS!');
     console.log('Image ID:', response.result.image.id);
@@ -173,36 +167,9 @@ export async function uploadImage(imagePath, itemName, userToken = null) {
  */
 export async function createCompleteItem(itemData, imagePath, userToken = null) {
   try {
-    console.log('Starting complete item creation with image upload...');
+    console.log('Starting complete item creation...');
     
-    // Step 1: Upload image if path provided
-    let imageId = null;
-    let imageUrl = null;
-    let imageUploadError = null;
-    
-    if (imagePath) {
-      console.log('Uploading image:', imagePath);
-      const imageResult = await uploadImage(imagePath, itemData.title, userToken);
-      
-      if (imageResult.success) {
-        imageId = imageResult.imageId;
-        imageUrl = imageResult.imageUrl;
-        console.log('Image uploaded successfully:', imageId);
-      } else {
-        console.warn('Image upload failed, creating item without image:', imageResult.error);
-        imageUploadError = {
-          error: imageResult.error,
-          details: imageResult.details
-        };
-        // Continue without image - don't fail the entire operation
-      }
-    }
-
-    // Step 2: Create catalog item (with image if uploaded)
-    if (imageId) {
-      itemData.imageId = imageId;
-    }
-    
+    // Step 1: Create catalog item first (without image)
     const itemResult = await createCatalogItem(itemData, userToken);
 
     if (!itemResult.success) {
@@ -213,10 +180,36 @@ export async function createCompleteItem(itemData, imagePath, userToken = null) 
       };
     }
 
+    const itemId = itemResult.itemId;
+    console.log('Item created successfully:', itemId);
+
+    // Step 2: Upload image and attach it to the item
+    let imageId = null;
+    let imageUrl = null;
+    let imageUploadError = null;
+    
+    if (imagePath) {
+      console.log('Uploading and attaching image to item:', itemId);
+      const imageResult = await uploadImageToItem(imagePath, itemId, itemData.title, userToken);
+      
+      if (imageResult.success) {
+        imageId = imageResult.imageId;
+        imageUrl = imageResult.imageUrl;
+        console.log('Image uploaded and attached successfully:', imageId);
+      } else {
+        console.warn('Image upload failed:', imageResult.error);
+        imageUploadError = {
+          error: imageResult.error,
+          details: imageResult.details
+        };
+        // Item is still created, just without image
+      }
+    }
+
     return {
       success: true,
       item: itemResult.catalogObject,
-      itemId: itemResult.itemId,
+      itemId: itemId,
       imageUrl: imageUrl,
       imageUploaded: !!imageId,
       imageUploadError: imageUploadError // Include error details if image upload failed
@@ -226,6 +219,81 @@ export async function createCompleteItem(itemData, imagePath, userToken = null) 
     return {
       success: false,
       error: error.message
+    };
+  }
+}
+
+/**
+ * Upload image and attach it to an existing catalog item
+ */
+async function uploadImageToItem(imagePath, itemId, itemName, userToken = null) {
+  try {
+    const client = getSquareClient(userToken);
+    
+    console.log('=== UPLOAD IMAGE TO ITEM START ===');
+    console.log('Item ID:', itemId);
+    console.log('Image path:', imagePath);
+    
+    // Check if file exists
+    try {
+      await fs.access(imagePath);
+      console.log('✓ Image file exists');
+    } catch (err) {
+      console.error('✗ Image file NOT found');
+      throw new Error(`Image file not found: ${imagePath}`);
+    }
+    
+    // Read the image file
+    const imageBuffer = await fs.readFile(imagePath);
+    console.log('✓ Image buffer read, size:', imageBuffer.length, 'bytes');
+    
+    // Determine content type
+    const isPng = imagePath.toLowerCase().endsWith('.png');
+    const contentType = isPng ? 'image/png' : 'image/jpeg';
+    
+    // Create FileWrapper
+    const imageFile = new FileWrapper(imageBuffer, {
+      contentType: contentType
+    });
+    
+    const idempotencyKey = uuidv4();
+    
+    // Create request with objectId pointing to the item
+    const request = {
+      idempotencyKey: idempotencyKey,
+      objectId: itemId, // Attach to existing item
+      isPrimary: true // Make this the primary image
+    };
+    
+    console.log('Uploading image with request:', {
+      idempotencyKey,
+      objectId: itemId,
+      isPrimary: true,
+      contentType
+    });
+    
+    const response = await client.catalogApi.createCatalogImage(request, imageFile);
+    
+    console.log('✓ Image upload SUCCESS!');
+    console.log('Image ID:', response.result.image.id);
+    console.log('=== UPLOAD IMAGE TO ITEM END ===');
+
+    return {
+      success: true,
+      imageId: response.result.image.id,
+      imageUrl: response.result.image.imageData?.url
+    };
+  } catch (error) {
+    console.error('=== UPLOAD IMAGE TO ITEM ERROR ===');
+    console.error('Error:', error.message);
+    if (error.errors) {
+      console.error('Details:', JSON.stringify(error.errors, null, 2));
+    }
+    console.error('=== END ERROR ===');
+    return {
+      success: false,
+      error: error.message,
+      details: error.errors || []
     };
   }
 }
