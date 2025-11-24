@@ -208,7 +208,7 @@ export function ItemForm() {
       {item.squareItemId && (
         <div className="form-actions">
           <a 
-            href={`https://app.squareup.com/login?return_to=https://app.squareupsandbox.com/dashboard/items/library/${item.squareItemId}`}
+            href={`https://app.squareup.com/login?return_to=${encodeURIComponent(`https://app.squareupsandbox.com/dashboard/items/library/${item.squareItemId}`)}`}
             target="_blank"
             rel="noopener noreferrer"
             className="btn btn-primary"
