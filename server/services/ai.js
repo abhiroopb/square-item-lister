@@ -3,9 +3,18 @@ import { config } from '../config/config.js';
 import sharp from 'sharp';
 import fs from 'fs/promises';
 
-const openai = new OpenAI({
-  apiKey: config.openai.apiKey,
-});
+// Helper to get OpenAI client with user's key or default
+function getOpenAIClient(userKey) {
+  const apiKey = userKey || config.openai.apiKey;
+  
+  if (!apiKey) {
+    throw new Error('OpenAI API key is required. Please configure it in Settings.');
+  }
+  
+  return new OpenAI({
+    apiKey,
+  });
+}
 
 /**
  * Enhance image to studio quality

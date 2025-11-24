@@ -100,6 +100,7 @@ router.post('/enhance', async (req, res) => {
 router.post('/analyze', async (req, res) => {
   try {
     const { imagePath } = req.body;
+    const userOpenAIKey = req.headers['x-openai-key'];
     
     if (!imagePath) {
       return res.status(400).json({ error: 'Image path required' });
@@ -107,9 +108,9 @@ router.post('/analyze', async (req, res) => {
 
     // Run AI analysis in parallel
     const [titleResult, descResult, priceResult] = await Promise.all([
-      generateTitle(imagePath),
-      generateDescription(imagePath),
-      suggestPrice(imagePath, 'Item')
+      generateTitle(imagePath, userOpenAIKey),
+      generateDescription(imagePath, null, userOpenAIKey),
+      suggestPrice(imagePath, 'Item', userOpenAIKey)
     ]);
 
     // If we have a title, search for more info

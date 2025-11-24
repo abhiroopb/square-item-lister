@@ -33,6 +33,7 @@ function convertBigIntToNumber(obj) {
 router.post('/create-item', async (req, res) => {
   try {
     const { title, description, price, imagePath } = req.body;
+    const userSquareToken = req.headers['x-square-token'];
     
     if (!title || !price || !imagePath) {
       return res.status(400).json({ 
@@ -42,7 +43,8 @@ router.post('/create-item', async (req, res) => {
 
     const result = await createCompleteItem(
       { title, description, price },
-      imagePath
+      imagePath,
+      userSquareToken
     );
 
     if (result.success) {

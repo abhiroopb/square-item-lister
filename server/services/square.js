@@ -3,20 +3,29 @@ import { config } from '../config/config.js';
 import { v4 as uuidv4 } from 'uuid';
 import fs from 'fs/promises';
 
-// Initialize Square client
-const client = new Client({
-  accessToken: config.square.accessToken,
-  environment: config.square.environment === 'production' 
-    ? Environment.Production 
-    : Environment.Sandbox,
-});
+// Helper to get Square client with user's token or default
+function getSquareClient(userToken) {
+  const accessToken = userToken || config.square.accessToken;
+  
+  if (!accessToken) {
+    throw new Error('Square access token is required. Please configure it in Settings.');
+  }
+  
+  return new Client({
+    accessToken,
+    environment: config.square.environment === 'production' 
+      ? Environment.Production 
+      : Environment.Sandbox,
+  });
+}
 
 /**
  * Create a catalog item in Square
  */
-export async function createCatalogItem(itemData) {
+export async function createCatalogItem(itemData, userToken = null) {
   try {
     const { title, description, price, imageId } = itemData;
+    const client = getSquareClient(userToken);
     
     // Convert price to cents (integer)
     const priceInCents = Math.round(parseFloat(price) * 100);
@@ -114,13 +123,13 @@ export async function uploadImage(imagePath, itemName) {
 /**
  * Complete workflow: Create catalog item (with optional image upload)
  */
-export async function createCompleteItem(itemData, imagePath) {
+export async function createCompleteItem(itemData, imagePath, userToken = null) {
   try {
     // For now, create item without image due to Square SDK multipart/form-data issue
     // TODO: Fix image upload with proper multipart handling
     console.log('Creating item without image (image upload needs fixing)');
     
-    const itemResult = await createCatalogItem(itemData);
+    const itemResult = await createCatalogItem(itemData, userToken);
 
     if (!itemResult.success) {
       return {
