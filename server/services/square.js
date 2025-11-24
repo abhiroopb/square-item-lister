@@ -93,10 +93,15 @@ export async function uploadImage(imagePath, itemName, userToken = null) {
     // Read the image file as a buffer
     const imageBuffer = await fs.readFile(imagePath);
     
+    // Determine content type from file extension
+    const isPng = imagePath.toLowerCase().endsWith('.png');
+    const contentType = isPng ? 'image/png' : 'image/jpeg';
+    const filename = isPng ? 'item-image.png' : 'item-image.jpg';
+    
     // Use Square's FileWrapper to properly format the file
     const imageFile = new FileWrapper(imageBuffer, {
-      filename: 'item-image.jpg',
-      contentType: 'image/jpeg'
+      filename: filename,
+      contentType: contentType
     });
     
     const request = {
@@ -114,6 +119,7 @@ export async function uploadImage(imagePath, itemName, userToken = null) {
     console.log('Uploading image to Square with FileWrapper...');
     console.log('Image path:', imagePath);
     console.log('Image buffer size:', imageBuffer.length);
+    console.log('Content type:', contentType);
     
     const response = await client.catalogApi.createCatalogImage(request);
     
