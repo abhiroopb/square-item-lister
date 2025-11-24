@@ -85,6 +85,8 @@ export function ItemForm() {
         imagePath: imagePath
       });
 
+      console.log('Square item creation result:', result);
+
       if (result.success) {
         updateItem({ squareItemId: result.itemId });
         
