@@ -216,6 +216,12 @@ export function ItemForm() {
             📦 View Item in Square
           </a>
           <p style={{ fontSize: '14px', color: '#666', marginTop: '8px', textAlign: 'center' }}>
+            <strong>To access your Sandbox item:</strong><br/>
+            1. Go to <a href="https://app.squareup.com/login?v=developers&return_to=https://developer.squareup.com/console/en/sandbox-test-accounts" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--sq-blue)', textDecoration: 'underline' }}>Square Developer Dashboard</a><br/>
+            2. Click "Square Dashboard" to open your Sandbox<br/>
+            3. Go to Items & Orders → Items Library<br/>
+            4. Find your item: <strong>{item.title}</strong><br/>
+            <br/>
             Item ID: <strong>{item.squareItemId}</strong>
           </p>
         </div>
