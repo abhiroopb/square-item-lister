@@ -5,23 +5,52 @@ export function ApiKeySetup({ onSubmit, onCancel, showCancel = false }) {
   const [squareToken, setSquareToken] = useState('');
   const [openaiKey, setOpenaiKey] = useState('');
   const [error, setError] = useState('');
+  const [hasExistingSquareKey, setHasExistingSquareKey] = useState(false);
+  const [hasExistingOpenAIKey, setHasExistingOpenAIKey] = useState(false);
+
+  useEffect(() => {
+    // Check if keys already exist
+    const existingSquareToken = localStorage.getItem('squareToken');
+    const existingOpenAIKey = localStorage.getItem('openaiKey');
+    
+    if (existingSquareToken) {
+      setHasExistingSquareKey(true);
+      setSquareToken(''); // Keep empty, will show placeholder
+    }
+    
+    if (existingOpenAIKey) {
+      setHasExistingOpenAIKey(true);
+      setOpenaiKey(''); // Keep empty, will show placeholder
+    }
+  }, []);
 
   const handleSubmit = (e) => {
     e.preventDefault();
     
-    if (!squareToken.trim()) {
+    // If keys exist and user didn't change them, just continue
+    const existingSquareToken = localStorage.getItem('squareToken');
+    const existingOpenAIKey = localStorage.getItem('openaiKey');
+    
+    // Check Square token
+    if (!squareToken.trim() && !existingSquareToken) {
       setError('Please enter your Square Sandbox Access Token');
       return;
     }
     
-    if (!openaiKey.trim()) {
+    // Check OpenAI key
+    if (!openaiKey.trim() && !existingOpenAIKey) {
       setError('Please enter your OpenAI API Key');
       return;
     }
 
-    // Save to localStorage
-    localStorage.setItem('squareToken', squareToken.trim());
-    localStorage.setItem('openaiKey', openaiKey.trim());
+    // Save to localStorage only if new values provided
+    if (squareToken.trim()) {
+      localStorage.setItem('squareToken', squareToken.trim());
+    }
+    
+    if (openaiKey.trim()) {
+      localStorage.setItem('openaiKey', openaiKey.trim());
+    }
     
     setError('');
     onSubmit();
@@ -46,18 +75,24 @@ export function ApiKeySetup({ onSubmit, onCancel, showCancel = false }) {
               type="text"
               value={squareToken}
               onChange={(e) => setSquareToken(e.target.value)}
-              placeholder="EAAAl..."
+              placeholder={hasExistingSquareKey ? "••••••••••••••••" : "EAAAl..."}
               className="form-input"
             />
             <small className="form-hint">
-              Get your token from the{' '}
-              <a 
-                href="https://squareup.com/login?return_to=https%3A%2F%2Fdeveloper.squareup.com%2Fapps" 
-                target="_blank" 
-                rel="noopener noreferrer"
-              >
-                Square Developer Dashboard
-              </a>
+              {hasExistingSquareKey ? (
+                <span className="existing-key-hint">✓ Key saved. Leave blank to keep existing key, or enter a new one to update.</span>
+              ) : (
+                <>
+                  Get your token from the{' '}
+                  <a 
+                    href="https://squareup.com/login?return_to=https%3A%2F%2Fdeveloper.squareup.com%2Fapps" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                  >
+                    Square Developer Dashboard
+                  </a>
+                </>
+              )}
             </small>
           </div>
 
@@ -71,18 +106,24 @@ export function ApiKeySetup({ onSubmit, onCancel, showCancel = false }) {
               type="password"
               value={openaiKey}
               onChange={(e) => setOpenaiKey(e.target.value)}
-              placeholder="sk-proj-..."
+              placeholder={hasExistingOpenAIKey ? "••••••••••••••••" : "sk-proj-..."}
               className="form-input"
             />
             <small className="form-hint">
-              Get your API key from{' '}
-              <a 
-                href="https://platform.openai.com/api-keys" 
-                target="_blank" 
-                rel="noopener noreferrer"
-              >
-                OpenAI Platform
-              </a>
+              {hasExistingOpenAIKey ? (
+                <span className="existing-key-hint">✓ Key saved. Leave blank to keep existing key, or enter a new one to update.</span>
+              ) : (
+                <>
+                  Get your API key from{' '}
+                  <a 
+                    href="https://platform.openai.com/api-keys" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                  >
+                    OpenAI Platform
+                  </a>
+                </>
+              )}
             </small>
           </div>
 
