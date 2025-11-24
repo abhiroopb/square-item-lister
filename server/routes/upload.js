@@ -1,6 +1,7 @@
 import express from 'express';
 import multer from 'multer';
 import path from 'path';
+import fs from 'fs/promises';
 import { fileURLToPath } from 'url';
 import { 
   enhanceImage, 
@@ -95,7 +96,21 @@ router.post('/enhance', async (req, res) => {
       }
     }
 
-    console.log('Enhancing image:', { imagePath, fullImagePath });
+    console.log('Enhancing image - __dirname:', __dirname);
+    console.log('Enhancing image - imagePath:', imagePath);
+    console.log('Enhancing image - fullImagePath:', fullImagePath);
+    
+    // Check if file exists
+    try {
+      await fs.access(fullImagePath);
+      console.log('File exists at:', fullImagePath);
+    } catch (err) {
+      console.error('File does not exist at:', fullImagePath);
+      return res.status(404).json({ 
+        error: 'Image file not found',
+        details: `File not found at: ${fullImagePath}` 
+      });
+    }
 
     const result = await enhanceImage(fullImagePath, userOpenAIKey);
     
