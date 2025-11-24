@@ -42,7 +42,7 @@ export async function enhanceImage(imagePath, userOpenAIKey) {
             content: [
               {
                 type: 'text',
-                text: 'Describe this product in detail for a professional product photography prompt. Focus on the main item, ignore hands or background clutter. Be concise (max 100 words).'
+                text: 'Describe ONLY the physical product in this image with extreme detail - exact colors, materials, text, labels, brand names, shape, size. Describe it exactly as it appears. Do not mention hands, background, or anything else. Be very specific about what makes this product unique. Max 150 words.'
               },
               {
                 type: 'image_url',
@@ -53,7 +53,7 @@ export async function enhanceImage(imagePath, userOpenAIKey) {
             ]
           }
         ],
-        max_tokens: 200
+        max_tokens: 250
       });
       
       const productDescription = visionResponse.choices[0].message.content.trim();
@@ -62,7 +62,7 @@ export async function enhanceImage(imagePath, userOpenAIKey) {
       // Generate a studio-quality product photo using DALL-E 3
       const dalleResponse = await openai.images.generate({
         model: 'dall-e-3',
-        prompt: `Professional product photography: ${productDescription}. Studio lighting, white background, centered composition, high-resolution, commercial quality, no hands or people visible.`,
+        prompt: `Professional product photography of exactly this product: ${productDescription}. The product must look IDENTICAL to the description - same colors, same labels, same text, same everything. Pure white background, professional studio lighting with soft shadows, centered composition, high-resolution commercial photography. The product should be the ONLY thing visible - no hands, no people, no other objects.`,
         n: 1,
         size: '1024x1024',
         quality: 'hd',

@@ -347,6 +347,14 @@ body {
   background: var(--sq-white);
 }
 
+/* Image Actions */
+.image-actions {
+  text-align: center;
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid var(--sq-gray-200);
+}
+
 /* Regenerate Section */
 .regenerate-section {
   text-align: center;

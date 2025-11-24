@@ -4,6 +4,14 @@ import { api } from '../services/api';
 export function ImagePreview() {
   const { item, updateItem, setLoading, setError } = useItem();
 
+  const handleUseOriginal = () => {
+    // Use the original image instead of enhanced
+    updateItem({
+      enhancedImage: null,
+      enhancedPath: null
+    });
+  };
+
   const handleRegenerate = async () => {
     if (!item.imagePath) return;
 
@@ -68,6 +76,14 @@ export function ImagePreview() {
           </div>
         )}
       </div>
+
+      {item.enhancedImage && (
+        <div className="image-actions">
+          <button onClick={handleUseOriginal} className="btn btn-secondary">
+            Use Original Image
+          </button>
+        </div>
+      )}
     </div>
   );
 }
