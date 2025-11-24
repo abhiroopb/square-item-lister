@@ -76,12 +76,13 @@ router.post('/', upload.single('image'), async (req, res) => {
 router.post('/enhance', async (req, res) => {
   try {
     const { imagePath } = req.body;
+    const userOpenAIKey = req.headers['x-openai-key'];
     
     if (!imagePath) {
       return res.status(400).json({ error: 'Image path required' });
     }
 
-    const result = await enhanceImage(imagePath);
+    const result = await enhanceImage(imagePath, userOpenAIKey);
     
     res.json(result);
   } catch (error) {

@@ -17,96 +17,112 @@ function getOpenAIClient(userKey) {
 }
 
 /**
- * Enhance image to studio quality
- * 1. Remove background using remove.bg API
- * 2. Add white background
- * 3. Apply professional enhancements
+ * Enhance image to studio quality using OpenAI DALL-E 3
+ * Uses image editing to create a professional product photo
  */
-export async function enhanceImage(imagePath) {
+export async function enhanceImage(imagePath, userOpenAIKey) {
   try {
-    const enhancedPath = imagePath.replace(/(\.\w+)$/, '-enhanced$1');
+    const openai = getOpenAIClient(userOpenAIKey);
+    const enhancedPath = imagePath.replace(/(\.\w+)$/, '-enhanced.png');
     
-    // Try to remove background using remove.bg API if key is available
-    const removeBgKey = process.env.REMOVE_BG_API_KEY || config.removeBg?.apiKey;
+    // Read the original image
+    const imageBuffer = await fs.readFile(imagePath);
+    const base64Image = imageBuffer.toString('base64');
+    const mimeType = imagePath.endsWith('.png') ? 'image/png' : 'image/jpeg';
     
-    if (removeBgKey) {
-      try {
-        const FormData = (await import('form-data')).default;
-        const axios = (await import('axios')).default;
-        
-        const formData = new FormData();
-        formData.append('image_file', await fs.readFile(imagePath), {
-          filename: 'image.jpg'
-        });
-        formData.append('size', 'auto');
-        formData.append('bg_color', 'ffffff'); // White background
-        
-        const response = await axios.post('https://api.remove.bg/v1.0/removebg', formData, {
-          headers: {
-            ...formData.getHeaders(),
-            'X-Api-Key': removeBgKey
-          },
-          responseType: 'arraybuffer'
-        });
-        
-        // Save the background-removed image
-        const noBgPath = imagePath.replace(/(\.\w+)$/, '-nobg.png');
-        await fs.writeFile(noBgPath, response.data);
-        
-        // Apply final enhancements
-        await sharp(noBgPath)
-          .resize(1200, 1200, { 
-            fit: 'inside',
-            withoutEnlargement: true,
-            background: { r: 255, g: 255, b: 255, alpha: 1 }
-          })
-          .flatten({ background: { r: 255, g: 255, b: 255 } })
-          .sharpen()
-          .toFile(enhancedPath);
-        
-        // Clean up temp file
-        await fs.unlink(noBgPath).catch(() => {});
-        
-        return {
-          success: true,
-          enhancedPath,
-          message: 'Image enhanced with background removal'
-        };
-      } catch (bgError) {
-        console.warn('Background removal failed, falling back to basic enhancement:', bgError.message);
-        // Fall through to basic enhancement
-      }
+    console.log('Using OpenAI to enhance image...');
+    
+    try {
+      // Use GPT-4 Vision to generate an enhanced prompt describing the product
+      const visionResponse = await openai.chat.completions.create({
+        model: 'gpt-4o',
+        messages: [
+          {
+            role: 'user',
+            content: [
+              {
+                type: 'text',
+                text: 'Describe this product in detail for a professional product photography prompt. Focus on the main item, ignore hands or background clutter. Be concise (max 100 words).'
+              },
+              {
+                type: 'image_url',
+                image_url: {
+                  url: `data:${mimeType};base64,${base64Image}`
+                }
+              }
+            ]
+          }
+        ],
+        max_tokens: 200
+      });
+      
+      const productDescription = visionResponse.choices[0].message.content.trim();
+      console.log('Product description:', productDescription);
+      
+      // Generate a studio-quality product photo using DALL-E 3
+      const dalleResponse = await openai.images.generate({
+        model: 'dall-e-3',
+        prompt: `Professional product photography: ${productDescription}. Studio lighting, white background, centered composition, high-resolution, commercial quality, no hands or people visible.`,
+        n: 1,
+        size: '1024x1024',
+        quality: 'hd',
+        style: 'natural'
+      });
+      
+      const imageUrl = dalleResponse.data[0].url;
+      console.log('Generated enhanced image URL:', imageUrl);
+      
+      // Download the enhanced image
+      const axios = (await import('axios')).default;
+      const response = await axios.get(imageUrl, { responseType: 'arraybuffer' });
+      
+      // Save and resize to consistent dimensions
+      await sharp(Buffer.from(response.data))
+        .resize(1200, 1200, { 
+          fit: 'inside',
+          withoutEnlargement: true,
+          background: { r: 255, g: 255, b: 255, alpha: 1 }
+        })
+        .toFile(enhancedPath);
+      
+      return {
+        success: true,
+        enhancedPath,
+        message: 'Image enhanced with OpenAI DALL-E 3'
+      };
+      
+    } catch (openaiError) {
+      console.warn('OpenAI enhancement failed, using fallback:', openaiError.message);
+      
+      // Fallback: Basic enhancement with Sharp
+      await sharp(imagePath)
+        .resize(1200, 1200, { 
+          fit: 'inside',
+          withoutEnlargement: true,
+          background: { r: 255, g: 255, b: 255, alpha: 1 }
+        })
+        .extend({
+          top: 50,
+          bottom: 50,
+          left: 50,
+          right: 50,
+          background: { r: 255, g: 255, b: 255, alpha: 1 }
+        })
+        .modulate({
+          brightness: 1.1,
+          saturation: 1.2
+        })
+        .normalize()
+        .sharpen({ sigma: 1.5 })
+        .flatten({ background: { r: 255, g: 255, b: 255 } })
+        .toFile(enhancedPath);
+      
+      return {
+        success: true,
+        enhancedPath,
+        message: 'Image enhanced with basic processing'
+      };
     }
-    
-    // Fallback: Basic enhancement without background removal
-    // Apply more aggressive enhancements to make a visible difference
-    await sharp(imagePath)
-      .resize(1200, 1200, { 
-        fit: 'inside',
-        withoutEnlargement: true,
-        background: { r: 255, g: 255, b: 255, alpha: 1 }
-      })
-      .extend({
-        top: 50,
-        bottom: 50,
-        left: 50,
-        right: 50,
-        background: { r: 255, g: 255, b: 255, alpha: 1 }
-      })
-      .modulate({
-        brightness: 1.1,  // Increase brightness by 10%
-        saturation: 1.2   // Increase saturation by 20%
-      })
-      .normalize() // Auto-adjust brightness/contrast
-      .sharpen({ sigma: 1.5 }) // More aggressive sharpening
-      .flatten({ background: { r: 255, g: 255, b: 255 } }) // Add white background
-      .toFile(enhancedPath);
-    
-    return {
-      success: true,
-      enhancedPath,
-      message: 'Image enhanced with studio lighting and white border'
-    };
   } catch (error) {
     console.error('Error enhancing image:', error);
     return {
