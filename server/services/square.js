@@ -247,13 +247,15 @@ async function uploadImageToItem(imagePath, itemId, itemName, userToken = null) 
     const imageBuffer = await fs.readFile(imagePath);
     console.log('✓ Image buffer read, size:', imageBuffer.length, 'bytes');
     
-    // Determine content type
+    // Determine content type and filename
     const isPng = imagePath.toLowerCase().endsWith('.png');
     const contentType = isPng ? 'image/png' : 'image/jpeg';
+    const filename = isPng ? 'item-image.png' : 'item-image.jpg';
     
-    // Create FileWrapper
+    // Create FileWrapper with both contentType and filename
     const imageFile = new FileWrapper(imageBuffer, {
-      contentType: contentType
+      contentType: contentType,
+      filename: filename
     });
     
     const idempotencyKey = uuidv4();
