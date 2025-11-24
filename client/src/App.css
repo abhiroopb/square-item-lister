@@ -267,12 +267,13 @@ body {
 
 .image-capture .page-title {
   transition: var(--sq-transition);
+  text-align: center;
 }
 
 .image-capture.has-content .page-title {
   font-size: 24px;
   margin-bottom: 24px;
-  text-align: left;
+  text-align: center;
 }
 
 .upload-options {
