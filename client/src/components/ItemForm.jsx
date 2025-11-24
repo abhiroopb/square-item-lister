@@ -131,11 +131,13 @@ export function ItemForm() {
       </form>
 
       <div className="form-actions">
-        {!item.squareItemId ? (
-          <button onClick={handlePublish} className="btn btn-success">
-            🚀 Create Square Listing
-          </button>
-        ) : (
+        <button onClick={handlePublish} className="btn btn-success">
+          🚀 Create Square Listing
+        </button>
+      </div>
+
+      {item.squareItemId && (
+        <div className="form-actions">
           <a 
             href={`https://app.squareupsandbox.com/dashboard/items/library/${item.squareItemId}`}
             target="_blank"
@@ -144,8 +146,8 @@ export function ItemForm() {
           >
             📦 View Item in Square
           </a>
-        )}
-      </div>
+        </div>
+      )}
 
       <div className="reset-section">
         <button onClick={handleReset} className="btn btn-secondary">
