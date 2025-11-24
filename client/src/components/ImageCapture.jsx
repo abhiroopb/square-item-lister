@@ -93,11 +93,8 @@ export function ImageCapture() {
       console.log('Upload result:', uploadResult);
       
       if (uploadResult.success) {
-        updateItem({ 
-          imagePath: uploadResult.imagePath,
-          filename: uploadResult.filename 
-        });
-        console.log('Image path updated:', uploadResult.imagePath);
+        // Automatically enhance and analyze
+        await processImage(uploadResult.imagePath);
       } else {
         const errorMsg = 'Failed to upload image: ' + (uploadResult.error || 'Unknown error');
         console.error(errorMsg);
@@ -107,6 +104,46 @@ export function ImageCapture() {
       const errorMsg = 'Error uploading image: ' + err.message;
       console.error(errorMsg, err);
       setError(errorMsg);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const processImage = async (imagePath) => {
+    try {
+      setLoading(true);
+      console.log('Processing image:', imagePath);
+
+      // Step 1: Enhance image (remove background, studio quality)
+      const enhanceResult = await api.enhanceImage(imagePath);
+      console.log('Enhance result:', enhanceResult);
+      
+      if (enhanceResult.success) {
+        // Load enhanced image
+        const enhancedUrl = `${import.meta.env.VITE_API_URL || '/api'}/uploads/${enhanceResult.enhancedPath.split('/').pop()}`;
+        updateItem({ 
+          imagePath: imagePath,
+          enhancedImage: enhancedUrl,
+          enhancedPath: enhanceResult.enhancedPath 
+        });
+
+        // Step 2: Analyze with AI
+        const analysisResult = await api.analyzeImage(enhanceResult.enhancedPath);
+        console.log('Analysis result:', analysisResult);
+        
+        if (analysisResult.success) {
+          updateItem({
+            title: analysisResult.title,
+            description: analysisResult.description,
+            price: analysisResult.suggestedPrice || 0
+          });
+        }
+      } else {
+        setError('Failed to enhance image: ' + (enhanceResult.error || 'Unknown error'));
+      }
+    } catch (err) {
+      setError('Error processing image: ' + err.message);
+      console.error(err);
     } finally {
       setLoading(false);
     }

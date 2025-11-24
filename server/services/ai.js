@@ -18,12 +18,67 @@ function getOpenAIClient(userKey) {
 
 /**
  * Enhance image to studio quality
- * Uses sharp for basic enhancements (brightness, contrast, sharpness)
+ * 1. Remove background using remove.bg API
+ * 2. Add white background
+ * 3. Apply professional enhancements
  */
 export async function enhanceImage(imagePath) {
   try {
     const enhancedPath = imagePath.replace(/(\.\w+)$/, '-enhanced$1');
     
+    // Try to remove background using remove.bg API if key is available
+    const removeBgKey = process.env.REMOVE_BG_API_KEY || config.removeBg?.apiKey;
+    
+    if (removeBgKey) {
+      try {
+        const FormData = (await import('form-data')).default;
+        const axios = (await import('axios')).default;
+        
+        const formData = new FormData();
+        formData.append('image_file', await fs.readFile(imagePath), {
+          filename: 'image.jpg'
+        });
+        formData.append('size', 'auto');
+        formData.append('bg_color', 'ffffff'); // White background
+        
+        const response = await axios.post('https://api.remove.bg/v1.0/removebg', formData, {
+          headers: {
+            ...formData.getHeaders(),
+            'X-Api-Key': removeBgKey
+          },
+          responseType: 'arraybuffer'
+        });
+        
+        // Save the background-removed image
+        const noBgPath = imagePath.replace(/(\.\w+)$/, '-nobg.png');
+        await fs.writeFile(noBgPath, response.data);
+        
+        // Apply final enhancements
+        await sharp(noBgPath)
+          .resize(1200, 1200, { 
+            fit: 'inside',
+            withoutEnlargement: true,
+            background: { r: 255, g: 255, b: 255, alpha: 1 }
+          })
+          .flatten({ background: { r: 255, g: 255, b: 255 } })
+          .sharpen()
+          .toFile(enhancedPath);
+        
+        // Clean up temp file
+        await fs.unlink(noBgPath).catch(() => {});
+        
+        return {
+          success: true,
+          enhancedPath,
+          message: 'Image enhanced with background removal'
+        };
+      } catch (bgError) {
+        console.warn('Background removal failed, falling back to basic enhancement:', bgError.message);
+        // Fall through to basic enhancement
+      }
+    }
+    
+    // Fallback: Basic enhancement without background removal
     await sharp(imagePath)
       .resize(1200, 1200, { 
         fit: 'inside',
@@ -31,6 +86,7 @@ export async function enhanceImage(imagePath) {
       })
       .normalize() // Auto-adjust brightness/contrast
       .sharpen() // Enhance sharpness
+      .flatten({ background: { r: 255, g: 255, b: 255 } }) // Add white background
       .toFile(enhancedPath);
     
     return {

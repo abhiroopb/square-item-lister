@@ -4,27 +4,43 @@ import { api } from '../services/api';
 export function ImagePreview() {
   const { item, updateItem, setLoading, setError } = useItem();
 
-  const handleEnhance = async () => {
+  const handleRegenerate = async () => {
     if (!item.imagePath) return;
 
     try {
       setLoading(true);
       setError(null);
+      console.log('Regenerating...');
 
-      const result = await api.enhanceImage(item.imagePath);
+      // Step 1: Re-enhance image
+      const enhanceResult = await api.enhanceImage(item.imagePath);
+      console.log('Enhance result:', enhanceResult);
       
-      if (result.success) {
+      if (enhanceResult.success) {
         // Load enhanced image
-        const enhancedUrl = `/uploads/${result.enhancedPath.split('/').pop()}`;
+        const enhancedUrl = `${import.meta.env.VITE_API_URL || '/api'}/uploads/${enhanceResult.enhancedPath.split('/').pop()}`;
         updateItem({ 
           enhancedImage: enhancedUrl,
-          enhancedPath: result.enhancedPath 
+          enhancedPath: enhanceResult.enhancedPath 
         });
+
+        // Step 2: Re-analyze with AI
+        const analysisResult = await api.analyzeImage(enhanceResult.enhancedPath);
+        console.log('Analysis result:', analysisResult);
+        
+        if (analysisResult.success) {
+          updateItem({
+            title: analysisResult.title,
+            description: analysisResult.description,
+            price: analysisResult.suggestedPrice || 0
+          });
+        }
       } else {
-        setError('Failed to enhance image');
+        setError('Failed to regenerate: ' + (enhanceResult.error || 'Unknown error'));
       }
     } catch (err) {
-      setError('Error enhancing image: ' + err.message);
+      setError('Error regenerating: ' + err.message);
+      console.error(err);
     } finally {
       setLoading(false);
     }
@@ -34,7 +50,14 @@ export function ImagePreview() {
 
   return (
     <div className="image-preview">
-      <h2>✨ Enhance Image (Optional)</h2>
+      <div className="preview-header">
+        <h2>✨ Studio Quality Image</h2>
+        {item.enhancedImage && (
+          <button onClick={handleRegenerate} className="btn btn-secondary">
+            🔄 Regenerate
+          </button>
+        )}
+      </div>
       
       <div className="image-comparison">
         <div className="image-box">
@@ -44,17 +67,11 @@ export function ImagePreview() {
         
         {item.enhancedImage && (
           <div className="image-box">
-            <h3>Enhanced</h3>
+            <h3>Studio Quality</h3>
             <img src={item.enhancedImage} alt="Enhanced" />
           </div>
         )}
       </div>
-
-      {!item.enhancedImage && (
-        <button onClick={handleEnhance} className="btn btn-primary">
-          ✨ Enhance Image
-        </button>
-      )}
     </div>
   );
 }
