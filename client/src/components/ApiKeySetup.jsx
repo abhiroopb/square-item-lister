@@ -31,7 +31,10 @@ export function ApiKeySetup({ onSubmit }) {
     <div className="api-key-setup">
       <div className="setup-container">
         <div className="setup-header">
-          <h2>🔑 Step 1: Configure API Keys</h2>
+          <h2>
+            <span className="step-indicator">1</span>
+            Configure API Keys
+          </h2>
           <p>Enter your API credentials to get started</p>
         </div>
 
@@ -94,7 +97,12 @@ export function ApiKeySetup({ onSubmit }) {
         </form>
 
         <div className="setup-info">
-          <h3>ℹ️ About Your Keys</h3>
+          <h3>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+              <path fillRule="evenodd" d="M8 1.5a6.5 6.5 0 100 13 6.5 6.5 0 000-13zM0 8a8 8 0 1116 0A8 8 0 010 8zm6.5-.25A.75.75 0 017.25 7h1a.75.75 0 01.75.75v2.75h.25a.75.75 0 010 1.5h-2a.75.75 0 010-1.5h.25v-2h-.25a.75.75 0 01-.75-.75zM8 6a1 1 0 100-2 1 1 0 000 2z"/>
+            </svg>
+            About Your Keys
+          </h3>
           <ul>
             <li>Your API keys are stored locally in your browser</li>
             <li>Keys are never sent to any server except Square and OpenAI</li>
