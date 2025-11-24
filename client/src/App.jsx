@@ -63,7 +63,7 @@ function App() {
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
                   <path d="M8 3.5a4.5 4.5 0 100 9 4.5 4.5 0 000-9zM2 8a6 6 0 1110.89 3.476l4.817 4.817a.75.75 0 01-1.06 1.06l-4.816-4.816A6 6 0 012 8z"/>
                 </svg>
-                Change Keys
+                <span>Change Keys</span>
               </button>
             )}
           </div>

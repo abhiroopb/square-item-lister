@@ -841,12 +841,23 @@ body {
 
 @media (max-width: 480px) {
   .header-content {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 12px;
+    position: relative;
   }
 
   .reset-keys-btn {
-    align-self: flex-start;
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+
+  .reset-keys-btn span {
+    display: none;
+  }
+
+  .reset-keys-btn svg {
+    margin: 0;
   }
 }
