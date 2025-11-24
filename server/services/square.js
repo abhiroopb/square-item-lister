@@ -115,40 +115,35 @@ export async function uploadImage(imagePath, itemName, userToken = null) {
     console.log('Content type:', contentType);
     console.log('Filename:', filename);
     
-    // Create a read stream for the image file
-    const imageStream = createReadStream(imagePath);
-    
-    // Use Square's FileWrapper with the stream
-    const imageFile = new FileWrapper(imageStream, {
-      contentType: contentType,
-      filename: filename
+    // Create FileWrapper for the image
+    const imageFile = new FileWrapper(imageBuffer, {
+      contentType: contentType
     });
     
-    const tempId = `#TEMP_IMAGE_${Date.now()}`;
-    
+    // The request object should NOT include imageFile
+    // imageFile is passed as a separate parameter
     const request = {
       idempotencyKey: uuidv4(),
       image: {
         type: 'IMAGE',
-        id: tempId,
+        id: `#TEMP_${uuidv4()}`,
         imageData: {
           caption: itemName || 'Product Image'
         }
-      },
-      imageFile: imageFile
+      }
     };
     
     console.log('Request structure:', {
       idempotencyKey: request.idempotencyKey,
       imageType: request.image.type,
       imageId: request.image.id,
-      caption: request.image.imageData.caption,
       contentType: contentType,
-      filename: filename
+      bufferSize: imageBuffer.length
     });
     
     console.log('Calling Square createCatalogImage API...');
-    const response = await client.catalogApi.createCatalogImage(request);
+    // Pass request and imageFile as separate parameters
+    const response = await client.catalogApi.createCatalogImage(request, imageFile);
     
     console.log('✓ Image upload SUCCESS!');
     console.log('Image ID:', response.result.image.id);
