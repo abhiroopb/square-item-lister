@@ -69,8 +69,9 @@ export async function removeBackground(imagePath) {
 /**
  * Generate item title from image using GPT-4 Vision
  */
-export async function generateTitle(imagePath) {
+export async function generateTitle(imagePath, userOpenAIKey) {
   try {
+    const openai = getOpenAIClient(userOpenAIKey);
     const imageBuffer = await fs.readFile(imagePath);
     const base64Image = imageBuffer.toString('base64');
     const mimeType = imagePath.endsWith('.png') ? 'image/png' : 'image/jpeg';
@@ -116,8 +117,9 @@ export async function generateTitle(imagePath) {
 /**
  * Generate item description from image using GPT-4 Vision
  */
-export async function generateDescription(imagePath, webSearchResults = null) {
+export async function generateDescription(imagePath, webSearchResults = null, userOpenAIKey) {
   try {
+    const openai = getOpenAIClient(userOpenAIKey);
     const imageBuffer = await fs.readFile(imagePath);
     const base64Image = imageBuffer.toString('base64');
     const mimeType = imagePath.endsWith('.png') ? 'image/png' : 'image/jpeg';
@@ -170,8 +172,9 @@ Focus on key features, materials, and benefits.`;
 /**
  * Suggest a price based on the item (optional feature)
  */
-export async function suggestPrice(imagePath, title) {
+export async function suggestPrice(imagePath, title, userOpenAIKey) {
   try {
+    const openai = getOpenAIClient(userOpenAIKey);
     const imageBuffer = await fs.readFile(imagePath);
     const base64Image = imageBuffer.toString('base64');
     const mimeType = imagePath.endsWith('.png') ? 'image/png' : 'image/jpeg';

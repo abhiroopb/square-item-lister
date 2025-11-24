@@ -121,7 +121,7 @@ router.post('/analyze', async (req, res) => {
         searchResults = searchResult.results;
         
         // Regenerate description with search results
-        const enhancedDesc = await generateDescription(imagePath, searchResults);
+        const enhancedDesc = await generateDescription(imagePath, searchResults, userOpenAIKey);
         if (enhancedDesc.success) {
           descResult.description = enhancedDesc.description;
         }
