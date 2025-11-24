@@ -2,6 +2,13 @@ import OpenAI from 'openai';
 import { config } from '../config/config.js';
 import sharp from 'sharp';
 import fs from 'fs/promises';
+import axios from 'axios';
+import FormData from 'form-data';
+import { createReadStream } from 'fs';
+
+// Track remove.bg API usage
+let removeBgCallCount = 0;
+const REMOVE_BG_LIMIT = 45;
 
 // Helper to get OpenAI client with user's key or default
 function getOpenAIClient(userKey) {
@@ -27,6 +34,7 @@ export async function enhanceImage(imagePath, userOpenAIKey) {
     console.log('=== IMAGE ENHANCEMENT START ===');
     console.log('Input path:', imagePath);
     console.log('Output path:', enhancedPath);
+    console.log('Remove.bg API calls used:', removeBgCallCount, '/', REMOVE_BG_LIMIT);
     
     // Check if input file exists
     try {
@@ -37,56 +45,83 @@ export async function enhanceImage(imagePath, userOpenAIKey) {
       throw new Error(`Input file not found: ${imagePath}`);
     }
     
-    // Professional enhancement using Sharp
-    // This preserves the original product exactly while improving quality
-    const image = sharp(imagePath);
-    const metadata = await image.metadata();
-    
-    // Calculate padding to add white border (10% of image dimensions)
-    const paddingH = Math.round(metadata.width * 0.1);
-    const paddingV = Math.round(metadata.height * 0.1);
-    
-    await image
-      .extend({
-        top: paddingV,
-        bottom: paddingV,
-        left: paddingH,
-        right: paddingH,
-        background: { r: 255, g: 255, b: 255, alpha: 1 }
-      })
-      .modulate({
-        brightness: 1.1,   // Slightly brighter
-        saturation: 1.05   // Slightly more saturated
-      })
-      .normalize()         // Auto-adjust levels
-      .sharpen()           // Sharper details
-      .flatten({ background: { r: 255, g: 255, b: 255 } })
-      .toFile(enhancedPath);
-    
-    console.log('✓ Enhanced image saved');
-    
-    // Verify the enhanced file was created
-    try {
-      await fs.access(enhancedPath);
-      const stats = await fs.stat(enhancedPath);
-      console.log('✓ Enhanced file exists, size:', stats.size, 'bytes');
-    } catch (err) {
-      console.error('✗ Enhanced file was NOT created');
-      throw new Error(`Failed to create enhanced file: ${enhancedPath}`);
+    // Check if we've hit the limit
+    if (removeBgCallCount >= REMOVE_BG_LIMIT) {
+      console.log('⚠️ Remove.bg API limit reached. Returning original image.');
+      // Just copy the original file
+      await fs.copyFile(imagePath, enhancedPath);
+      
+      const filename = enhancedPath.split('/').pop();
+      return {
+        success: true,
+        enhancedPath: `/uploads/${filename}`,
+        absolutePath: enhancedPath,
+        message: 'API limit reached - using original image'
+      };
     }
     
-    // Return just the filename for the frontend
-    const filename = enhancedPath.split('/').pop();
+    // Try remove.bg API
+    const removeBgApiKey = process.env.REMOVE_BG_API_KEY || 'tFSLZ66rEQGGSucN8cu4xZYr';
     
-    console.log('Returning enhancedPath:', `/uploads/${filename}`);
-    console.log('=== IMAGE ENHANCEMENT END ===');
-    
-    return {
-      success: true,
-      enhancedPath: `/uploads/${filename}`,  // Relative path for frontend
-      absolutePath: enhancedPath,  // Keep absolute path for server use
-      message: 'Image enhanced with professional processing'
-    };
+    if (removeBgApiKey) {
+      try {
+        console.log('Using remove.bg API for background removal...');
+        
+        const formData = new FormData();
+        formData.append('image_file', createReadStream(imagePath));
+        formData.append('size', 'auto');
+        formData.append('bg_color', 'ffffff'); // White background
+        
+        const response = await axios.post('https://api.remove.bg/v1.0/removebg', formData, {
+          headers: {
+            'X-Api-Key': removeBgApiKey,
+            ...formData.getHeaders()
+          },
+          responseType: 'arraybuffer'
+        });
+        
+        // Save the result
+        await fs.writeFile(enhancedPath, response.data);
+        
+        // Increment counter
+        removeBgCallCount++;
+        console.log('✓ Background removed successfully');
+        console.log('Remove.bg API calls used:', removeBgCallCount, '/', REMOVE_BG_LIMIT);
+        
+        const filename = enhancedPath.split('/').pop();
+        return {
+          success: true,
+          enhancedPath: `/uploads/${filename}`,
+          absolutePath: enhancedPath,
+          message: 'Background removed with remove.bg'
+        };
+      } catch (error) {
+        console.error('Remove.bg API error:', error.message);
+        console.log('Falling back to original image...');
+        
+        // Fall back to original
+        await fs.copyFile(imagePath, enhancedPath);
+        
+        const filename = enhancedPath.split('/').pop();
+        return {
+          success: true,
+          enhancedPath: `/uploads/${filename}`,
+          absolutePath: enhancedPath,
+          message: 'Using original image (remove.bg failed)'
+        };
+      }
+    } else {
+      console.log('No remove.bg API key - using original image');
+      await fs.copyFile(imagePath, enhancedPath);
+      
+      const filename = enhancedPath.split('/').pop();
+      return {
+        success: true,
+        enhancedPath: `/uploads/${filename}`,
+        absolutePath: enhancedPath,
+        message: 'Using original image'
+      };
+    }
   } catch (error) {
     console.error('=== IMAGE ENHANCEMENT ERROR ===');
     console.error('Error:', error.message);
