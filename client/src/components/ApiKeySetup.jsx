@@ -1,18 +1,10 @@
 import { useState, useEffect } from 'react';
 import './ApiKeySetup.css';
 
-export function ApiKeySetup({ onSubmit, onCancel }) {
+export function ApiKeySetup({ onSubmit, onCancel, showCancel = false }) {
   const [squareToken, setSquareToken] = useState('');
   const [openaiKey, setOpenaiKey] = useState('');
   const [error, setError] = useState('');
-  const [hasExistingKeys, setHasExistingKeys] = useState(false);
-
-  useEffect(() => {
-    // Check if keys already exist
-    const existingSquare = localStorage.getItem('squareToken');
-    const existingOpenai = localStorage.getItem('openaiKey');
-    setHasExistingKeys(!!existingSquare && !!existingOpenai);
-  }, []);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -100,7 +92,7 @@ export function ApiKeySetup({ onSubmit, onCancel }) {
             <button type="submit" className="submit-btn">
               Continue to Image Upload →
             </button>
-            {hasExistingKeys && onCancel && (
+            {showCancel && onCancel && (
               <button type="button" onClick={onCancel} className="cancel-btn">
                 Cancel
               </button>
