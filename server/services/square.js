@@ -88,15 +88,32 @@ export async function createCatalogItem(itemData, userToken = null) {
  */
 export async function uploadImage(imagePath, itemName, userToken = null) {
   try {
+    console.log('=== SQUARE IMAGE UPLOAD START ===');
+    console.log('Image path:', imagePath);
+    console.log('Item name:', itemName);
+    
     const client = getSquareClient(userToken);
+    
+    // Check if file exists
+    try {
+      await fs.access(imagePath);
+      console.log('✓ Image file exists at:', imagePath);
+    } catch (err) {
+      console.error('✗ Image file NOT found at:', imagePath);
+      throw new Error(`Image file not found: ${imagePath}`);
+    }
     
     // Read the image file as a buffer
     const imageBuffer = await fs.readFile(imagePath);
+    console.log('✓ Image buffer read, size:', imageBuffer.length, 'bytes');
     
     // Determine content type from file extension
     const isPng = imagePath.toLowerCase().endsWith('.png');
     const contentType = isPng ? 'image/png' : 'image/jpeg';
     const filename = isPng ? 'item-image.png' : 'item-image.jpg';
+    
+    console.log('Content type:', contentType);
+    console.log('Filename:', filename);
     
     // Use Square's FileWrapper to properly format the file
     const imageFile = new FileWrapper(imageBuffer, {
@@ -116,14 +133,13 @@ export async function uploadImage(imagePath, itemName, userToken = null) {
       imageFile: imageFile
     };
     
-    console.log('Uploading image to Square with FileWrapper...');
-    console.log('Image path:', imagePath);
-    console.log('Image buffer size:', imageBuffer.length);
-    console.log('Content type:', contentType);
-    
+    console.log('Calling Square createCatalogImage API...');
     const response = await client.catalogApi.createCatalogImage(request);
     
-    console.log('Image upload response:', JSON.stringify(response.result, null, 2));
+    console.log('✓ Image upload SUCCESS!');
+    console.log('Image ID:', response.result.image.id);
+    console.log('Image URL:', response.result.image.imageData?.url);
+    console.log('=== SQUARE IMAGE UPLOAD END ===');
 
     return {
       success: true,
@@ -131,8 +147,10 @@ export async function uploadImage(imagePath, itemName, userToken = null) {
       imageUrl: response.result.image.imageData?.url
     };
   } catch (error) {
-    console.error('Error uploading image:', error);
+    console.error('=== SQUARE IMAGE UPLOAD ERROR ===');
+    console.error('Error message:', error.message);
     console.error('Error details:', JSON.stringify(error.errors, null, 2));
+    console.error('=== END ERROR ===');
     return {
       success: false,
       error: error.message,
