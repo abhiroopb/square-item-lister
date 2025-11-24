@@ -9,20 +9,26 @@ export function ApiKeySetup({ onSubmit, onCancel, showCancel = false }) {
   const [hasExistingOpenAIKey, setHasExistingOpenAIKey] = useState(false);
 
   useEffect(() => {
-    // Check if keys already exist
-    const existingSquareToken = localStorage.getItem('squareToken');
-    const existingOpenAIKey = localStorage.getItem('openaiKey');
+    // Check if keys already exist every time component renders
+    const checkExistingKeys = () => {
+      const existingSquareToken = localStorage.getItem('squareToken');
+      const existingOpenAIKey = localStorage.getItem('openaiKey');
+      
+      setHasExistingSquareKey(!!existingSquareToken);
+      setHasExistingOpenAIKey(!!existingOpenAIKey);
+      
+      // Reset input fields if keys exist
+      if (existingSquareToken) {
+        setSquareToken('');
+      }
+      
+      if (existingOpenAIKey) {
+        setOpenaiKey('');
+      }
+    };
     
-    if (existingSquareToken) {
-      setHasExistingSquareKey(true);
-      setSquareToken(''); // Keep empty, will show placeholder
-    }
-    
-    if (existingOpenAIKey) {
-      setHasExistingOpenAIKey(true);
-      setOpenaiKey(''); // Keep empty, will show placeholder
-    }
-  }, []);
+    checkExistingKeys();
+  }, [showCancel]); // Re-run when showCancel changes (indicates modal opened)
 
   const handleSubmit = (e) => {
     e.preventDefault();
