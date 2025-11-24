@@ -96,21 +96,39 @@ router.post('/enhance', async (req, res) => {
       }
     }
 
-    console.log('Enhancing image - __dirname:', __dirname);
-    console.log('Enhancing image - imagePath:', imagePath);
-    console.log('Enhancing image - fullImagePath:', fullImagePath);
+    console.log('=== ENHANCE DEBUG ===');
+    console.log('__dirname:', __dirname);
+    console.log('imagePath (from frontend):', imagePath);
+    console.log('fullImagePath (converted):', fullImagePath);
+    
+    // List files in uploads directory
+    try {
+      const uploadsDir = path.join(__dirname, '../uploads');
+      const files = await fs.readdir(uploadsDir);
+      console.log('Files in uploads directory:', files);
+    } catch (err) {
+      console.error('Error reading uploads directory:', err);
+    }
     
     // Check if file exists
     try {
       await fs.access(fullImagePath);
-      console.log('File exists at:', fullImagePath);
+      console.log('✓ File exists at:', fullImagePath);
     } catch (err) {
-      console.error('File does not exist at:', fullImagePath);
+      console.error('✗ File does NOT exist at:', fullImagePath);
+      console.error('Access error:', err.message);
       return res.status(404).json({ 
         error: 'Image file not found',
-        details: `File not found at: ${fullImagePath}` 
+        details: `File not found at: ${fullImagePath}`,
+        debug: {
+          __dirname,
+          imagePath,
+          fullImagePath,
+          error: err.message
+        }
       });
     }
+    console.log('=== END DEBUG ===');
 
     const result = await enhanceImage(fullImagePath, userOpenAIKey);
     
