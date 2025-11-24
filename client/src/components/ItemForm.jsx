@@ -208,7 +208,7 @@ export function ItemForm() {
       {item.squareItemId && (
         <div className="form-actions">
           <a 
-            href="https://developer.squareup.com/apps"
+            href="https://app.squareup.com/login?v=developers&return_to=https://developer.squareup.com/apps"
             target="_blank"
             rel="noopener noreferrer"
             className="btn btn-primary"
