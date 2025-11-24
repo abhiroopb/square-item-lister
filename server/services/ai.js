@@ -39,25 +39,27 @@ export async function enhanceImage(imagePath, userOpenAIKey) {
     
     // Professional enhancement using Sharp
     // This preserves the original product exactly while improving quality
-    await sharp(imagePath)
-      .resize(1200, 1200, { 
-        fit: 'inside',
-        withoutEnlargement: true,
-        background: { r: 255, g: 255, b: 255, alpha: 1 }
-      })
+    const image = sharp(imagePath);
+    const metadata = await image.metadata();
+    
+    // Calculate padding to add white border (10% of image dimensions)
+    const paddingH = Math.round(metadata.width * 0.1);
+    const paddingV = Math.round(metadata.height * 0.1);
+    
+    await image
       .extend({
-        top: 100,
-        bottom: 100,
-        left: 100,
-        right: 100,
+        top: paddingV,
+        bottom: paddingV,
+        left: paddingH,
+        right: paddingH,
         background: { r: 255, g: 255, b: 255, alpha: 1 }
       })
       .modulate({
-        brightness: 1.15,  // Slightly brighter
-        saturation: 1.1    // Slightly more saturated
+        brightness: 1.1,   // Slightly brighter
+        saturation: 1.05   // Slightly more saturated
       })
       .normalize()         // Auto-adjust levels
-      .sharpen({ sigma: 2 })  // Sharper details
+      .sharpen()           // Sharper details
       .flatten({ background: { r: 255, g: 255, b: 255 } })
       .toFile(enhancedPath);
     
