@@ -85,9 +85,13 @@ export async function enhanceImage(imagePath, userOpenAIKey) {
         })
         .toFile(enhancedPath);
       
+      // Return just the filename for the frontend
+      const filename = enhancedPath.split('/').pop();
+      
       return {
         success: true,
-        enhancedPath,
+        enhancedPath: `/uploads/${filename}`,  // Relative path for frontend
+        absolutePath: enhancedPath,  // Keep absolute path for server use
         message: 'Image enhanced with OpenAI DALL-E 3'
       };
       
@@ -117,9 +121,13 @@ export async function enhanceImage(imagePath, userOpenAIKey) {
         .flatten({ background: { r: 255, g: 255, b: 255 } })
         .toFile(enhancedPath);
       
+      // Return just the filename for the frontend
+      const filename = enhancedPath.split('/').pop();
+      
       return {
         success: true,
-        enhancedPath,
+        enhancedPath: `/uploads/${filename}`,  // Relative path for frontend
+        absolutePath: enhancedPath,  // Keep absolute path for server use
         message: 'Image enhanced with basic processing'
       };
     }
