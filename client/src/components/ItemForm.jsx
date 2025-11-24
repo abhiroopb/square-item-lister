@@ -208,7 +208,7 @@ export function ItemForm() {
       {item.squareItemId && (
         <div className="form-actions">
           <a 
-            href="https://app.squareup.com/login?v=developers&return_to=https://developer.squareup.com/apps"
+            href="https://app.squareup.com/login?v=developers&return_to=https://developer.squareup.com/console/en/sandbox-test-accounts"
             target="_blank"
             rel="noopener noreferrer"
             className="btn btn-primary"
@@ -216,8 +216,8 @@ export function ItemForm() {
             📦 View Item in Square Sandbox
           </a>
           <p style={{ fontSize: '14px', color: '#666', marginTop: '8px', textAlign: 'center' }}>
-            1. Click the link to go to Square Developer Dashboard<br/>
-            2. Click "Open" next to your Sandbox test account<br/>
+            1. Click the link to go to Sandbox Test Accounts<br/>
+            2. Click "Square Dashboard" to open your Sandbox<br/>
             3. Go to Items & Orders → Items Library<br/>
             4. Find your item: <strong>{item.title}</strong>
           </p>
