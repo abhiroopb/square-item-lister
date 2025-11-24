@@ -75,6 +75,8 @@ router.post('/create-item', async (req, res) => {
         message: 'Item created successfully in Square',
         itemId: safeResult.itemId,
         imageUrl: safeResult.imageUrl,
+        imageUploaded: safeResult.imageUploaded,
+        imageUploadError: safeResult.imageUploadError, // Include image upload error if any
         note: safeResult.note,
         item: safeResult.item
       });

@@ -87,7 +87,17 @@ export function ItemForm() {
 
       if (result.success) {
         updateItem({ squareItemId: result.itemId });
-        setSuccess(`✅ Item created successfully! Item ID: ${result.itemId}`);
+        
+        // Check if image was uploaded
+        if (result.imageUploaded) {
+          setSuccess(`✅ Item created successfully with image! Item ID: ${result.itemId}`);
+        } else if (result.imageUploadError) {
+          setSuccess(`✅ Item created successfully! Item ID: ${result.itemId}`);
+          setError(`⚠️ Warning: Image upload failed - ${result.imageUploadError.error}. Item created without image.`);
+          console.error('Image upload error details:', result.imageUploadError);
+        } else {
+          setSuccess(`✅ Item created successfully! Item ID: ${result.itemId}`);
+        }
       } else {
         setError('Failed to create item in Square: ' + result.error);
       }

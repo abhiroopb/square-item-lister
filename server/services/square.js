@@ -169,6 +169,7 @@ export async function createCompleteItem(itemData, imagePath, userToken = null) 
     // Step 1: Upload image if path provided
     let imageId = null;
     let imageUrl = null;
+    let imageUploadError = null;
     
     if (imagePath) {
       console.log('Uploading image:', imagePath);
@@ -180,6 +181,10 @@ export async function createCompleteItem(itemData, imagePath, userToken = null) 
         console.log('Image uploaded successfully:', imageId);
       } else {
         console.warn('Image upload failed, creating item without image:', imageResult.error);
+        imageUploadError = {
+          error: imageResult.error,
+          details: imageResult.details
+        };
         // Continue without image - don't fail the entire operation
       }
     }
@@ -204,7 +209,8 @@ export async function createCompleteItem(itemData, imagePath, userToken = null) 
       item: itemResult.catalogObject,
       itemId: itemResult.itemId,
       imageUrl: imageUrl,
-      imageUploaded: !!imageId
+      imageUploaded: !!imageId,
+      imageUploadError: imageUploadError // Include error details if image upload failed
     };
   } catch (error) {
     console.error('Error in complete item creation:', error);
